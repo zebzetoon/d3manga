@@ -4,23 +4,25 @@ const MAX_SAYFA = 100;
 let ARSIV = {}; 
 let currentSeri = null;
 
-// --- 1. GERİ TUŞU DİNLEYİCİSİ (SİHİRLİ KOD) ---
-// Tarayıcının veya telefonun geri tuşuna basıldığında burası çalışır
+// ==========================================
+// CUSDIS AYARLARI (BURAYI DOLDUR!)
+// ==========================================
+const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
+// ==========================================
+
+// --- 1. GERİ TUŞU DİNLEYİCİSİ ---
 window.addEventListener('popstate', (event) => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlSeri = urlParams.get('seri');
     const urlBolum = urlParams.get('bolum');
 
-    // Eğer URL'de seri varsa detay veya okuyucuyu aç
     if (urlSeri && ARSIV[urlSeri]) {
         if (urlBolum) {
-            // false = Geçmişe ekleme yapma, sadece ekranı aç
             openReader(urlSeri, urlBolum, false); 
         } else {
             openDetail(urlSeri, false);
         }
     } else {
-        // URL boşsa ana sayfaya dön
         closeDetail(false);
     }
 });
@@ -32,20 +34,19 @@ document.addEventListener("DOMContentLoaded", () => {
         grid.innerHTML = ""; 
         
         let rows = t.split('\n');
-
-        // GÜVENLİK 1: En üstteki satırı direk çöpe at (Başlık satırı)
-        if (rows.length > 0) rows.shift(); 
+        if (rows.length > 0) rows.shift(); // Başlık satırını sil
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
-            
-            // GÜVENLİK 2: Satır çok kısaysa atla
             if(d.length < 5) return;
+            
+            // Gizli karakter ve İsim başlığı temizliği
+            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (kontrolIsim === "isim" || d[0] === "") return;
 
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // GÜVENLİK 3: "Aralık" kısmı sayı değilse bu bir başlıktır, ATLA!
-            // Başlık satırında "Aralık" yazar (Not a Number), gerçek seride "1" veya "1-10" yazar.
+            // Aralık sayı değilse atla (Başlık satırı koruması)
             if (isNaN(parseInt(aralik))) return;
 
             // Veri Tamamlama
@@ -54,13 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if(!ozet) ozet = "Özet bilgisi girilmedi.";
             if(!yazar) yazar = "Anonim";
 
-            // Arşive Ekle
             if(!ARSIV[isim]) ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
                 meta: { kapak, tur, durum, yazar, banner, ozet }
             };
             
-            // Bölümleri Hesapla
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
@@ -71,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // Kart HTML
             let durumHtml = durum && durum.toLowerCase().includes("tamam") ? 
                 `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
                 `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
@@ -91,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.innerHTML += cardHtml;
         });
 
-        // Site ilk açıldığında URL kontrolü (F5 atınca doğru yerde açılması için)
+        // URL Kontrolü (Sayfa yenilenince doğru yerde açılması için)
         const urlParams = new URLSearchParams(window.location.search);
         const urlSeri = urlParams.get('seri');
         const urlBolum = urlParams.get('bolum');
@@ -106,9 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// --- 3. FONKSİYONLAR (Geri Tuşu Destekli) ---
+// --- 3. FONKSİYONLAR ---
 
-// historyEkle: true ise URL'yi değiştirir (Tıklama), false ise değiştirmez (Geri tuşu)
 function openDetail(isim, historyEkle = true) {
     currentSeri = isim;
     let data = ARSIV[isim];
@@ -119,7 +116,6 @@ function openDetail(isim, historyEkle = true) {
         window.history.pushState({path: newUrl}, '', newUrl);
     }
 
-    // Ekranı Doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -145,12 +141,13 @@ function openDetail(isim, historyEkle = true) {
         listContainer.appendChild(item);
     });
 
-    // Görünümü Değiştir
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
     
-    // Sadece tıklayarak geldiysek yukarı kaydır, geri tuşuyla geldiysek elleme
+    // YORUMLARI YÜKLE (Seri ID: seri_ISIM)
+    loadCusdis("seri_" + isim, isim, "cusdis_series");
+
     if(historyEkle) window.scrollTo(0,0);
 }
 
@@ -159,7 +156,6 @@ function closeDetail(historyEkle = true) {
         const baseUrl = window.location.pathname;
         window.history.pushState({}, '', baseUrl);
     }
-
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
@@ -187,15 +183,15 @@ function openReader(isim, bolumNo = null, historyEkle = true) {
         cSel.add(o);
     });
     
-    // Resimleri Getir (History false ise tekrar pushState yapmaz)
     resimGetir(false); 
     
+    // YORUMLARI YÜKLE (Bölüm ID: bolum_ISIM_NO)
+    loadCusdis("bolum_" + isim + "_" + bolumNo, isim + " Bölüm " + bolumNo, "cusdis_chapter");
+
     if(historyEkle) document.getElementById('reader-view').scrollTop = 0;
 }
 
 function closeReader() {
-    // Okuyucudan çıkınca detay sayfasına dönülür
-    // Bu manuel bir işlem olduğu için historyEkle = true
     openDetail(currentSeri, true);
 }
 
@@ -204,14 +200,14 @@ function resimGetir(historyEkle = true) {
     const b = document.getElementById('cSelect').value;
     let veri = ARSIV[currentSeri];
     
-    // Bölüm seçiciden değiştirilirse URL güncellensin
     if (historyEkle) {
         const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
         window.history.pushState({path: newUrl}, '', newUrl);
+        // Bölüm değişince yorumları güncelle
+        loadCusdis("bolum_" + currentSeri + "_" + b, currentSeri + " Bölüm " + b, "cusdis_chapter");
     }
 
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
-    
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
     box.innerHTML = "";
@@ -243,4 +239,35 @@ function sonraki() {
     const cSel = document.getElementById('cSelect');
     if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
     else { alert("Bitti!"); } 
-                        }
+}
+
+// --- CUSDIS YÜKLEYİCİ FONKSİYONU ---
+function loadCusdis(pageId, pageTitle, containerId) {
+    // 1. Kutuları temizle
+    document.getElementById("cusdis_series").innerHTML = "";
+    document.getElementById("cusdis_chapter").innerHTML = "";
+
+    // 2. Hedef kutuyu seç
+    let target = document.getElementById(containerId);
+    if (!target) return;
+    
+    // 3. Özel Div Oluştur (Türkçe ve Dark Mode)
+    target.innerHTML = `<div id="cusdis_thread"
+        data-host="https://cusdis.com"
+        data-app-id="${CUSDIS_APP_ID}"
+        data-page-id="${pageId}"
+        data-page-url="${window.location.href}"
+        data-page-title="${pageTitle}"
+        data-theme="dark"
+        data-lang="tr"></div>`; 
+
+    // 4. Scripti Çalıştır
+    if (window.CUSDIS) {
+        window.CUSDIS.initial();
+    } else {
+        let script = document.createElement("script");
+        script.src = "https://cusdis.com/js/cusdis.es.js";
+        script.async = true;
+        document.body.appendChild(script);
+    }
+}
