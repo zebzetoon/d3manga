@@ -6,17 +6,17 @@
 <title>Manga Okuyucu</title>
 <style>
     body { background-color: #121212; color: #ddd; margin: 0; font-family: sans-serif; }
-    .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; }
-    select, button { padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; font-size: 16px; cursor: pointer;}
+    .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    select, button { padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; font-size: 16px; cursor: pointer; margin: 2px;}
     .viewer { max-width: 800px; margin: 0 auto; background: #000; min-height: 100vh; }
     .viewer img { width: 100%; display: block; }
-    .loading { text-align: center; padding: 50px; color: #888; }
+    .loading { text-align: center; padding: 50px; color: #888; font-size: 18px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <select id="sSelect" onchange="bolumGetir()"><option>Yükleniyor...</option></select>
+    <select id="sSelect" onchange="bolumleriListele()"><option>Yükleniyor...</option></select>
     <select id="cSelect" onchange="resimGetir()"></select>
     <button onclick="sonraki()">Sonraki &gt;</button>
 </div>
@@ -24,77 +24,106 @@
 <div class="viewer" id="box"></div>
 
 <script>
+    // --- AYAR: Her bölümde en fazla kaç resim aransın? ---
+    const MAX_SAYFA = 100; 
+    // -----------------------------------------------------
+
     let ARSIV = {}; 
     const sSel = document.getElementById('sSelect');
     const cSel = document.getElementById('cSelect');
     const box = document.getElementById('box');
 
-    // CSV OKUMA
+    // 1. CSV OKUMA VE ARALIKLARI (RANGE) ÇÖZME
     fetch('liste.csv?t=' + Date.now()).then(r => r.text()).then(t => {
         sSel.innerHTML = ""; 
         t.split('\n').forEach(l => {
             let d = l.split(',').map(x => x.trim());
-            // Eğer satır boşsa veya eksikse atla
-            if(d.length < 6) return;
             
-            // CSV SIRALAMASI: İsim, Klasör, Kullanıcı, Depo, Bölüm, Sayfa
-            let [gorunenAd, klasorAd, user, repo, bolum, sayfa] = d;
+            // Format: İsim, Klasör, Kullanıcı, Depo, ARALIK (Örn: 1-10)
+            if(d.length < 5) return;
+            
+            let [isim, klasor, user, repo, aralik] = d;
 
-            if(!ARSIV[gorunenAd]) ARSIV[gorunenAd] = { bolumler: {}, klasor: klasorAd };
-            
-            ARSIV[gorunenAd].bolumler[bolum] = { 
-                u: user, 
-                r: repo, 
-                k: klasorAd, // Klasör adı burada çok önemli
-                s: parseInt(sayfa)
-            };
+            if(!ARSIV[isim]) ARSIV[isim] = { bolumler: {} };
+
+            // "1-10" formatını veya tek "1" formatını anla
+            let baslangic, bitis;
+            if (aralik.includes('-')) {
+                let parcalar = aralik.split('-');
+                baslangic = parseInt(parcalar[0]);
+                bitis = parseInt(parcalar[1]);
+            } else {
+                baslangic = parseInt(aralik);
+                bitis = parseInt(aralik);
+            }
+
+            // Döngü ile o aralıktaki tüm bölümleri kaydet
+            for (let i = baslangic; i <= bitis; i++) {
+                ARSIV[isim].bolumler[i] = {
+                    u: user,
+                    r: repo,
+                    k: klasor
+                };
+            }
         });
         
+        // Serileri Menüye Ekle
         Object.keys(ARSIV).sort().forEach(s => {
             let o = document.createElement("option"); o.text = s; o.value = s; sSel.add(o);
         });
-        bolumGetir();
+        bolumleriListele();
     });
 
-    function bolumGetir() {
+    // 2. MENÜYÜ DOLDUR
+    function bolumleriListele() {
         cSel.innerHTML = "";
         let s = sSel.value;
         if(!ARSIV[s]) return;
-        Object.keys(ARSIV[s].bolumler).sort((a,b)=>a-b).forEach(b => {
+        
+        // Bölümleri Sırala
+        let bolumListesi = Object.keys(ARSIV[s].bolumler).sort((a,b)=>parseInt(a)-parseInt(b));
+        
+        bolumListesi.forEach(b => {
             let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; cSel.add(o);
         });
         resimGetir();
     }
 
+    // 3. RESİMLERİ GETİR (OTOMATİK TARAMA)
     function resimGetir() {
-        box.innerHTML = "<div class='loading'>Yükleniyor...</div>";
+        box.innerHTML = "<div class='loading'>Sayfalar Yükleniyor...</div>";
         window.scrollTo(0,0);
+        
         let s = sSel.value; 
         let b = cSel.value;
         if(!ARSIV[s] || !ARSIV[s].bolumler[b]) return;
 
-        let data = ARSIV[s].bolumler[b];
-        box.innerHTML = "";
+        let veri = ARSIV[s].bolumler[b];
+        box.innerHTML = ""; 
 
-        for(let i=1; i<=data.s; i++) {
+        // 1'den MAX_SAYFA'ya kadar dene
+        for(let i=1; i<=MAX_SAYFA; i++) {
             let img = document.createElement("img");
+            let baseSrc = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${veri.k}/${b}/`;
             
-            // TEST 1 URL YAPISINI OLUŞTURUYORUZ
-            // https://cdn.jsdelivr.net/gh/toonarc/olum-pakti/olum-pakti/1/01.jpg
-            let baseSrc = `https://cdn.jsdelivr.net/gh/${data.u}/${data.r}/${data.k}/${b}/`;
-            
-            // Akıllı dosya bulucu (01.jpg veya 1.jpg)
             img.dataset.sayi = i;
-            img.src = baseSrc + i.toString().padStart(2, '0') + ".jpg"; 
+            img.src = baseSrc + i.toString().padStart(2, '0') + ".jpg"; // Önce 01.jpg
             img.loading = "lazy";
-            
+
+            // Hata Yönetimi (Resim yoksa veya format farklıysa)
             img.onerror = function() {
-                // Eğer 01.jpg yoksa 1.jpg dene
                 let sayi = this.dataset.sayi;
-                if (this.src.includes("/" + sayi.toString().padStart(2,'0') + ".jpg")) {
+                // 1.jpg dene
+                if(this.src.includes(sayi.toString().padStart(2,'0') + ".jpg")) {
                     this.src = baseSrc + sayi + ".jpg";
-                } else {
-                    this.style.display = "none";
+                } 
+                // 001.jpg dene
+                else if(!this.src.includes(sayi.toString().padStart(3,'0'))) {
+                    this.src = baseSrc + sayi.toString().padStart(3,'0') + ".jpg";
+                }
+                // Yoksa sil
+                else {
+                    this.remove(); 
                 }
             };
             box.appendChild(img);
