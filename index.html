@@ -6,10 +6,44 @@
 <title>Manga Okuyucu</title>
 <style>
     body { background-color: #121212; color: #ddd; margin: 0; font-family: sans-serif; }
-    .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    select, button { padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; font-size: 16px; cursor: pointer; margin: 2px;}
-    .viewer { max-width: 800px; margin: 0 auto; background: #000; min-height: 100vh; }
-    .viewer img { width: 100%; display: block; }
+    
+    .header { 
+        background: #1f1f1f; padding: 10px; text-align: center; 
+        position: sticky; top: 0; z-index: 999; 
+        border-bottom: 3px solid #ff4500; 
+        display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; 
+    }
+    
+    select, button { 
+        padding: 8px; background: #333; color: white; 
+        border: 1px solid #555; border-radius: 4px; 
+        font-size: 16px; cursor: pointer; margin: 2px;
+    }
+    
+    .viewer { 
+        max-width: 800px; /* PC'de çok yayılmasın */
+        width: 100%;      /* Mobilde tam ekran olsun */
+        margin: 0 auto; 
+        background: #000; 
+        min-height: 100vh; 
+    }
+    
+    /* --- İŞTE SİHİRLİ KOD BURASI --- */
+    .viewer img { 
+        width: 100%; 
+        display: block; 
+        
+        /* Resmi netleştirme komutları */
+        image-rendering: -webkit-optimize-contrast; /* Chrome/Safari için */
+        image-rendering: crisp-edges;               /* Modern tarayıcılar */
+        image-rendering: pixelated;                 /* Piksel bozulmasını önle */
+        
+        /* Mobilde bulanıklığı önlemek için donanım hızlandırma */
+        transform: translateZ(0); 
+        backface-visibility: hidden;
+    }
+    /* ------------------------------ */
+
     .loading { text-align: center; padding: 50px; color: #888; font-size: 18px; }
 </style>
 </head>
@@ -24,9 +58,11 @@
 <div class="viewer" id="box"></div>
 
 <script>
-    // --- AYAR: Her bölümde en fazla kaç resim aransın? ---
+    // --- AYARLAR ---
     const MAX_SAYFA = 100; 
-    // -----------------------------------------------------
+    // Cache'i kırmak için zaman damgası
+    const CACHE_ID = Date.now(); 
+    // ----------------
 
     let ARSIV = {}; 
     const sSel = document.getElementById('sSelect');
@@ -34,18 +70,16 @@
     const box = document.getElementById('box');
 
     // 1. CSV OKUMA
-    fetch('liste.csv?t=' + Date.now()).then(r => r.text()).then(t => {
+    fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         sSel.innerHTML = ""; 
         t.split('\n').forEach(l => {
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5) return;
             
-            // Format: İsim, Klasör, Kullanıcı, Depo, Bölüm Aralığı
             let [isim, klasor, user, repo, aralik] = d;
 
             if(!ARSIV[isim]) ARSIV[isim] = { bolumler: {} };
 
-            // Aralık Çözücü (1-40 veya tek bölüm)
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
@@ -89,28 +123,24 @@
         let veri = ARSIV[s].bolumler[b];
         box.innerHTML = ""; 
 
-        // Klasör kontrolü (Nokta varsa boş geç)
         let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
         for(let i=1; i<=MAX_SAYFA; i++) {
             let img = document.createElement("img");
             
-            // Link Yapısı: User / Repo / (Varsa Klasör) / Bölüm /
             let baseSrc = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${klasorYolu}${b}/`;
-            
             img.dataset.sayi = i;
-            
-            // ÖNCE 1.jpg DENE (Sıfırsız) - Senin yapın bu
-            img.src = baseSrc + i + ".jpg"; 
+            let cacheBuster = "?v=" + CACHE_ID;
+
+            // Önce 1.jpg dene (Senin formatın)
+            img.src = baseSrc + i + ".jpg" + cacheBuster; 
             img.loading = "lazy";
 
             img.onerror = function() {
                 let sayi = this.dataset.sayi;
-                // Eğer 1.jpg yoksa -> 01.jpg dene (Yedek)
                 if(!this.src.includes(sayi.toString().padStart(2,'0') + ".jpg")) {
-                    this.src = baseSrc + sayi.toString().padStart(2,'0') + ".jpg";
+                    this.src = baseSrc + sayi.toString().padStart(2,'0') + ".jpg" + cacheBuster;
                 }
-                // O da yoksa gizle
                 else {
                     this.remove(); 
                 }
