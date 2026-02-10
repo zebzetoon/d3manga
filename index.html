@@ -33,95 +33,84 @@
     const cSel = document.getElementById('cSelect');
     const box = document.getElementById('box');
 
-    // 1. CSV OKUMA VE ARALIKLARI (RANGE) ÇÖZME
+    // 1. CSV OKUMA
     fetch('liste.csv?t=' + Date.now()).then(r => r.text()).then(t => {
         sSel.innerHTML = ""; 
         t.split('\n').forEach(l => {
             let d = l.split(',').map(x => x.trim());
-            
-            // Format: İsim, Klasör, Kullanıcı, Depo, ARALIK (Örn: 1-10)
             if(d.length < 5) return;
             
+            // Format: İsim, Klasör, Kullanıcı, Depo, Bölüm Aralığı
             let [isim, klasor, user, repo, aralik] = d;
 
             if(!ARSIV[isim]) ARSIV[isim] = { bolumler: {} };
 
-            // "1-10" formatını veya tek "1" formatını anla
+            // Aralık Çözücü (1-40 veya tek bölüm)
             let baslangic, bitis;
             if (aralik.includes('-')) {
-                let parcalar = aralik.split('-');
-                baslangic = parseInt(parcalar[0]);
-                bitis = parseInt(parcalar[1]);
+                let p = aralik.split('-');
+                baslangic = parseInt(p[0]);
+                bitis = parseInt(p[1]);
             } else {
                 baslangic = parseInt(aralik);
                 bitis = parseInt(aralik);
             }
 
-            // Döngü ile o aralıktaki tüm bölümleri kaydet
             for (let i = baslangic; i <= bitis; i++) {
-                ARSIV[isim].bolumler[i] = {
-                    u: user,
-                    r: repo,
-                    k: klasor
-                };
+                ARSIV[isim].bolumler[i] = { u: user, r: repo, k: klasor };
             }
         });
         
-        // Serileri Menüye Ekle
         Object.keys(ARSIV).sort().forEach(s => {
             let o = document.createElement("option"); o.text = s; o.value = s; sSel.add(o);
         });
         bolumleriListele();
     });
 
-    // 2. MENÜYÜ DOLDUR
+    // 2. MENÜ
     function bolumleriListele() {
         cSel.innerHTML = "";
         let s = sSel.value;
         if(!ARSIV[s]) return;
         
-        // Bölümleri Sırala
-        let bolumListesi = Object.keys(ARSIV[s].bolumler).sort((a,b)=>parseInt(a)-parseInt(b));
-        
-        bolumListesi.forEach(b => {
+        Object.keys(ARSIV[s].bolumler).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(b => {
             let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; cSel.add(o);
         });
         resimGetir();
     }
 
-    // 3. RESİMLERİ GETİR (OTOMATİK TARAMA)
+    // 3. RESİMLERİ GETİR
     function resimGetir() {
-        box.innerHTML = "<div class='loading'>Sayfalar Yükleniyor...</div>";
+        box.innerHTML = "<div class='loading'>Yükleniyor...</div>";
         window.scrollTo(0,0);
-        
-        let s = sSel.value; 
-        let b = cSel.value;
+        let s = sSel.value; let b = cSel.value;
         if(!ARSIV[s] || !ARSIV[s].bolumler[b]) return;
 
         let veri = ARSIV[s].bolumler[b];
         box.innerHTML = ""; 
 
-        // 1'den MAX_SAYFA'ya kadar dene
+        // Klasör kontrolü (Nokta varsa boş geç)
+        let klasorYolu = veri.k === "." ? "" : veri.k + "/";
+
         for(let i=1; i<=MAX_SAYFA; i++) {
             let img = document.createElement("img");
-            let baseSrc = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${veri.k}/${b}/`;
+            
+            // Link Yapısı: User / Repo / (Varsa Klasör) / Bölüm /
+            let baseSrc = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${klasorYolu}${b}/`;
             
             img.dataset.sayi = i;
-            img.src = baseSrc + i.toString().padStart(2, '0') + ".jpg"; // Önce 01.jpg
+            
+            // ÖNCE 1.jpg DENE (Sıfırsız) - Senin yapın bu
+            img.src = baseSrc + i + ".jpg"; 
             img.loading = "lazy";
 
-            // Hata Yönetimi (Resim yoksa veya format farklıysa)
             img.onerror = function() {
                 let sayi = this.dataset.sayi;
-                // 1.jpg dene
-                if(this.src.includes(sayi.toString().padStart(2,'0') + ".jpg")) {
-                    this.src = baseSrc + sayi + ".jpg";
-                } 
-                // 001.jpg dene
-                else if(!this.src.includes(sayi.toString().padStart(3,'0'))) {
-                    this.src = baseSrc + sayi.toString().padStart(3,'0') + ".jpg";
+                // Eğer 1.jpg yoksa -> 01.jpg dene (Yedek)
+                if(!this.src.includes(sayi.toString().padStart(2,'0') + ".jpg")) {
+                    this.src = baseSrc + sayi.toString().padStart(2,'0') + ".jpg";
                 }
-                // Yoksa sil
+                // O da yoksa gizle
                 else {
                     this.remove(); 
                 }
