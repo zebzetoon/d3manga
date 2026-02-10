@@ -4,49 +4,48 @@ const MAX_SAYFA = 100;
 let ARSIV = {}; 
 let currentSeri = null;
 
-// --- GERİ TUŞU DİNLEYİCİSİ (SİHİRLİ KOD) ---
-// Telefonun veya tarayıcının geri tuşuna basılınca burası çalışır
+// --- 1. GERİ TUŞU DİNLEYİCİSİ (SİHİRLİ KOD) ---
+// Tarayıcının veya telefonun geri tuşuna basıldığında burası çalışır
 window.addEventListener('popstate', (event) => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlSeri = urlParams.get('seri');
     const urlBolum = urlParams.get('bolum');
 
+    // Eğer URL'de seri varsa detay veya okuyucuyu aç
     if (urlSeri && ARSIV[urlSeri]) {
         if (urlBolum) {
-            // Okuyucuyu aç (ama geçmişe tekrar ekleme yapma)
-            openReader(urlSeri, urlBolum, false);
+            // false = Geçmişe ekleme yapma, sadece ekranı aç
+            openReader(urlSeri, urlBolum, false); 
         } else {
-            // Detay sayfasını aç (geçmişe ekleme yapma)
             openDetail(urlSeri, false);
         }
     } else {
-        // Ana sayfaya dön (geçmişe ekleme yapma)
+        // URL boşsa ana sayfaya dön
         closeDetail(false);
     }
 });
 
-// 1. BAŞLANGIÇ
+// --- 2. CSV OKUMA VE BAŞLANGIÇ ---
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
         let rows = t.split('\n');
-        
-        // 1. Güvenlik: Başlık satırını sil
+
+        // GÜVENLİK 1: En üstteki satırı direk çöpe at (Başlık satırı)
         if (rows.length > 0) rows.shift(); 
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
             
-            // 2. Güvenlik: Boş veya hatalı satırları atla
+            // GÜVENLİK 2: Satır çok kısaysa atla
             if(d.length < 5) return;
-            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, "");
-            if (kontrolIsim === "isim" || d[0] === "") return;
 
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // 3. Güvenlik: Aralık sayı değilse atla
+            // GÜVENLİK 3: "Aralık" kısmı sayı değilse bu bir başlıktır, ATLA!
+            // Başlık satırında "Aralık" yazar (Not a Number), gerçek seride "1" veya "1-10" yazar.
             if (isNaN(parseInt(aralik))) return;
 
             // Veri Tamamlama
@@ -55,11 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if(!ozet) ozet = "Özet bilgisi girilmedi.";
             if(!yazar) yazar = "Anonim";
 
+            // Arşive Ekle
             if(!ARSIV[isim]) ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
                 meta: { kapak, tur, durum, yazar, banner, ozet }
             };
             
+            // Bölümleri Hesapla
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
@@ -70,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
+            // Kart HTML
             let durumHtml = durum && durum.toLowerCase().includes("tamam") ? 
                 `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
                 `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
@@ -89,14 +91,14 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.innerHTML += cardHtml;
         });
 
-        // URL KONTROLÜ (Sayfa Yenilenince Kaldığı Yerden Devam Et)
+        // Site ilk açıldığında URL kontrolü (F5 atınca doğru yerde açılması için)
         const urlParams = new URLSearchParams(window.location.search);
         const urlSeri = urlParams.get('seri');
         const urlBolum = urlParams.get('bolum');
 
         if (urlSeri && ARSIV[urlSeri]) {
             if (urlBolum) {
-                openReader(urlSeri, urlBolum, false); // false = Geçmişe ekleme (zaten oradayız)
+                openReader(urlSeri, urlBolum, false);
             } else {
                 openDetail(urlSeri, false);
             }
@@ -104,8 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 2. DETAY SAYFASI
-// historyEkle: Geri tuşuyla mı geldik yoksa tıkladık mı? (Tıkladıysak true, geri tuşuysa false)
+// --- 3. FONKSİYONLAR (Geri Tuşu Destekli) ---
+
+// historyEkle: true ise URL'yi değiştirir (Tıklama), false ise değiştirmez (Geri tuşu)
 function openDetail(isim, historyEkle = true) {
     currentSeri = isim;
     let data = ARSIV[isim];
@@ -116,7 +119,7 @@ function openDetail(isim, historyEkle = true) {
         window.history.pushState({path: newUrl}, '', newUrl);
     }
 
-    // Verileri Doldur
+    // Ekranı Doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -142,9 +145,12 @@ function openDetail(isim, historyEkle = true) {
         listContainer.appendChild(item);
     });
 
+    // Görünümü Değiştir
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
+    
+    // Sadece tıklayarak geldiysek yukarı kaydır, geri tuşuyla geldiysek elleme
     if(historyEkle) window.scrollTo(0,0);
 }
 
@@ -155,10 +161,10 @@ function closeDetail(historyEkle = true) {
     }
 
     document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('reader-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
 }
 
-// 3. OKUYUCU MODU
 function openReader(isim, bolumNo = null, historyEkle = true) {
     if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
 
@@ -181,12 +187,15 @@ function openReader(isim, bolumNo = null, historyEkle = true) {
         cSel.add(o);
     });
     
-    resimGetir(historyEkle); // Eğer geri tuşuyla geldiysek en tepeye atmasın diye kontrol edilebilir ama şimdilik standart
+    // Resimleri Getir (History false ise tekrar pushState yapmaz)
+    resimGetir(false); 
+    
+    if(historyEkle) document.getElementById('reader-view').scrollTop = 0;
 }
 
 function closeReader() {
-    // Okuyucudan çıkınca Detaya dönüyoruz
-    // Bu manuel bir tıklama olduğu için pushState yapıyoruz
+    // Okuyucudan çıkınca detay sayfasına dönülür
+    // Bu manuel bir işlem olduğu için historyEkle = true
     openDetail(currentSeri, true);
 }
 
@@ -195,7 +204,7 @@ function resimGetir(historyEkle = true) {
     const b = document.getElementById('cSelect').value;
     let veri = ARSIV[currentSeri];
     
-    // Bölüm değiştirince URL güncelle
+    // Bölüm seçiciden değiştirilirse URL güncellensin
     if (historyEkle) {
         const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
         window.history.pushState({path: newUrl}, '', newUrl);
@@ -203,9 +212,6 @@ function resimGetir(historyEkle = true) {
 
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
     
-    // Sadece yeni açıldığında yukarı kaydır
-    if (historyEkle) document.getElementById('reader-view').scrollTop = 0;
-
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
     box.innerHTML = "";
@@ -237,4 +243,4 @@ function sonraki() {
     const cSel = document.getElementById('cSelect');
     if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
     else { alert("Bitti!"); } 
-}
+                        }
