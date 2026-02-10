@@ -4,52 +4,62 @@ const MAX_SAYFA = 100;
 let ARSIV = {}; 
 let currentSeri = null;
 
-// 1. BAŞLANGIÇ: CSV OKU VE URL KONTROL ET
+// --- GERİ TUŞU DİNLEYİCİSİ (SİHİRLİ KOD) ---
+// Telefonun veya tarayıcının geri tuşuna basılınca burası çalışır
+window.addEventListener('popstate', (event) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSeri = urlParams.get('seri');
+    const urlBolum = urlParams.get('bolum');
+
+    if (urlSeri && ARSIV[urlSeri]) {
+        if (urlBolum) {
+            // Okuyucuyu aç (ama geçmişe tekrar ekleme yapma)
+            openReader(urlSeri, urlBolum, false);
+        } else {
+            // Detay sayfasını aç (geçmişe ekleme yapma)
+            openDetail(urlSeri, false);
+        }
+    } else {
+        // Ana sayfaya dön (geçmişe ekleme yapma)
+        closeDetail(false);
+    }
+});
+
+// 1. BAŞLANGIÇ
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
-        // Satırlara böl
         let rows = t.split('\n');
-
-        // --- GÜVENLİK DUVARI 1: İLK SATIRI DİREKT SİL ---
-        // Excel başlık satırını hafızadan siliyoruz.
+        
+        // 1. Güvenlik: Başlık satırını sil
         if (rows.length > 0) rows.shift(); 
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
             
-            // --- GÜVENLİK DUVARI 2: BOŞ SATIRLARI ATLA ---
+            // 2. Güvenlik: Boş veya hatalı satırları atla
             if(d.length < 5) return;
-
-            // --- GÜVENLİK DUVARI 3: İÇERİK KONTROLÜ ---
-            // Eğer ilk sütun hala "İsim" ise veya boşsa atla
-            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, ""); // Gizli karakterleri temizle
+            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, "");
             if (kontrolIsim === "isim" || d[0] === "") return;
 
-            // CSV SÜTUNLARI
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // --- GÜVENLİK DUVARI 4: "ARALIK" KONTROLÜ ---
-            // Eğer 5. sütun (Aralık) bir sayı veya "1-10" gibi bir şey değilse, bu bir başlıktır. Atla.
-            // Başlık satırında burada "Aralık" yazar, sayı yazmaz.
+            // 3. Güvenlik: Aralık sayı değilse atla
             if (isNaN(parseInt(aralik))) return;
 
-
-            // Veri Kontrolü (Eksikleri tamamla)
+            // Veri Tamamlama
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner || banner === "") banner = kapak; 
             if(!ozet) ozet = "Özet bilgisi girilmedi.";
             if(!yazar) yazar = "Anonim";
 
-            // Arşive Kaydet
             if(!ARSIV[isim]) ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
                 meta: { kapak, tur, durum, yazar, banner, ozet }
             };
             
-            // Bölüm Hesapla
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
@@ -60,13 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // Kart HTML
-            let durumHtml = "";
-            if(durum && durum.toLowerCase().includes("tamam")) {
-                durumHtml = `<div class="tag tag-status tag-completed">Tamamlandı</div>`;
-            } else {
-                durumHtml = `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
-            }
+            let durumHtml = durum && durum.toLowerCase().includes("tamam") ? 
+                `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
+                `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
 
             let cardHtml = `
             <div class="manga-card" onclick="openDetail('${isim}')">
@@ -83,31 +89,32 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.innerHTML += cardHtml;
         });
 
-        // --- URL KONTROLÜ ---
+        // URL KONTROLÜ (Sayfa Yenilenince Kaldığı Yerden Devam Et)
         const urlParams = new URLSearchParams(window.location.search);
         const urlSeri = urlParams.get('seri');
         const urlBolum = urlParams.get('bolum');
 
         if (urlSeri && ARSIV[urlSeri]) {
             if (urlBolum) {
-                openReader(urlSeri, urlBolum);
+                openReader(urlSeri, urlBolum, false); // false = Geçmişe ekleme (zaten oradayız)
             } else {
-                openDetail(urlSeri);
+                openDetail(urlSeri, false);
             }
         }
-
     });
 });
 
-// 2. DETAY SAYFASINI AÇ
-function openDetail(isim) {
+// 2. DETAY SAYFASI
+// historyEkle: Geri tuşuyla mı geldik yoksa tıkladık mı? (Tıkladıysak true, geri tuşuysa false)
+function openDetail(isim, historyEkle = true) {
     currentSeri = isim;
     let data = ARSIV[isim];
     if(!data) return;
 
-    // URL GÜNCELLEME
-    const newUrl = `?seri=${encodeURIComponent(isim)}`;
-    window.history.pushState({path: newUrl}, '', newUrl);
+    if (historyEkle) {
+        const newUrl = `?seri=${encodeURIComponent(isim)}`;
+        window.history.pushState({path: newUrl}, '', newUrl);
+    }
 
     // Verileri Doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
@@ -138,23 +145,27 @@ function openDetail(isim) {
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
-    window.scrollTo(0,0);
+    if(historyEkle) window.scrollTo(0,0);
 }
 
-function closeDetail() {
-    const baseUrl = window.location.pathname;
-    window.history.pushState({}, '', baseUrl);
+function closeDetail(historyEkle = true) {
+    if (historyEkle) {
+        const baseUrl = window.location.pathname;
+        window.history.pushState({}, '', baseUrl);
+    }
 
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
 }
 
-// 3. OKUYUCU MODUNU AÇ
-function openReader(isim, bolumNo = null) {
+// 3. OKUYUCU MODU
+function openReader(isim, bolumNo = null, historyEkle = true) {
     if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
 
-    const newUrl = `?seri=${encodeURIComponent(isim)}&bolum=${bolumNo}`;
-    window.history.pushState({path: newUrl}, '', newUrl);
+    if (historyEkle) {
+        const newUrl = `?seri=${encodeURIComponent(isim)}&bolum=${bolumNo}`;
+        window.history.pushState({path: newUrl}, '', newUrl);
+    }
 
     currentSeri = isim; 
 
@@ -170,28 +181,30 @@ function openReader(isim, bolumNo = null) {
         cSel.add(o);
     });
     
-    resimGetir();
+    resimGetir(historyEkle); // Eğer geri tuşuyla geldiysek en tepeye atmasın diye kontrol edilebilir ama şimdilik standart
 }
 
 function closeReader() {
-    const newUrl = `?seri=${encodeURIComponent(currentSeri)}`;
-    window.history.pushState({path: newUrl}, '', newUrl);
-
-    document.getElementById('reader-view').style.display = 'none';
-    document.getElementById('detail-view').style.display = 'block'; 
-    document.getElementById('box').innerHTML = ""; 
+    // Okuyucudan çıkınca Detaya dönüyoruz
+    // Bu manuel bir tıklama olduğu için pushState yapıyoruz
+    openDetail(currentSeri, true);
 }
 
-function resimGetir() {
+function resimGetir(historyEkle = true) {
     const box = document.getElementById('box');
     const b = document.getElementById('cSelect').value;
     let veri = ARSIV[currentSeri];
     
-    const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
-    window.history.pushState({path: newUrl}, '', newUrl);
+    // Bölüm değiştirince URL güncelle
+    if (historyEkle) {
+        const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
+        window.history.pushState({path: newUrl}, '', newUrl);
+    }
 
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
-    document.getElementById('reader-view').scrollTop = 0;
+    
+    // Sadece yeni açıldığında yukarı kaydır
+    if (historyEkle) document.getElementById('reader-view').scrollTop = 0;
 
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
