@@ -1,39 +1,97 @@
 /* --- GENEL AYARLAR --- */
-body { background-color: #000; color: #fff; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 80px; overflow-x: hidden; }
+body { 
+    background-color: #000; 
+    color: #fff; 
+    margin: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding-bottom: 80px; /* Alt menü için boşluk */
+    overflow-x: hidden; 
+}
 a { text-decoration: none; color: white; }
 button { cursor: pointer; }
 
 /* --- ANA SAYFA --- */
-.app-container { padding: 15px; display: block; min-height: 100vh; }
-.banner { width: 100%; height: 180px; background: #111; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; background-image: linear-gradient(45deg, #d32f2f, #000); }
-.section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
-.section-title span { color: #888; font-size: 12px; }
-.manga-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 20px; }
-@media (min-width: 768px) { .manga-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } .app-container { max-width: 1200px; margin: 0 auto; } }
+.app-container { 
+    padding: 15px; 
+    display: block; /* Ana sayfa görünür olsun */
+    min-height: 100vh; 
+}
 
-/* KARTLAR */
+.banner { 
+    width: 100%; 
+    height: 180px; 
+    background: #111; 
+    border-radius: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 20px; 
+    background-image: linear-gradient(45deg, #d32f2f, #000); 
+}
+
+.section-title { 
+    font-size: 18px; 
+    font-weight: bold; 
+    margin: 20px 0 10px 0; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.section-title span { color: #888; font-size: 12px; }
+
+/* Manga Izgarası */
+.manga-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* Telefondan 2'li görünüm */
+    gap: 15px; 
+    padding-bottom: 20px; 
+}
+@media (min-width: 768px) { 
+    .manga-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } 
+    .app-container { max-width: 1200px; margin: 0 auto; } 
+}
+
+/* Kart Tasarımı */
 .manga-card { border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s; }
 .manga-card:hover { transform: translateY(-5px); }
-.card-img-container { width: 100%; aspect-ratio: 2/3; position: relative; border-radius: 12px; overflow: hidden; background: #222; }
+
+.card-img-container { 
+    width: 100%; 
+    aspect-ratio: 2/3; 
+    position: relative; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    background: #222; 
+}
 .card-img { width: 100%; height: 100%; object-fit: cover; }
+
 .tag { position: absolute; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; z-index: 10; }
 .tag-new { top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid #fff; }
 .tag-status { top: 8px; left: 8px; }
 .tag-completed { background: #d32f2f; }
 .tag-ongoing { background: #388e3c; }
+
 .card-info { padding-top: 8px; }
 .card-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-genre { font-size: 11px; color: #aaa; margin-top: 2px; }
 
-/* --- DETAY SAYFASI (YENİ!) --- */
-#detail-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; z-index: 1500; overflow-y: auto; }
+/* --- DETAY SAYFASI (ÖNEMLİ KISIM) --- */
+#detail-view { 
+    display: none; /* BAŞLANGIÇTA GİZLİ OLMALI */
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: #121212; 
+    z-index: 1500; 
+    overflow-y: auto; 
+}
 
-/* Arka Plan Bulanık Banner */
 .detail-banner { 
-    width: 100%; height: 400px; 
+    width: 100%; height: 350px; 
     position: absolute; top: 0; left: 0; 
     background-size: cover; background-position: center; 
-    /* Alt tarafı karartarak geçiş yap */
     mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0));
     -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0));
     opacity: 0.5; filter: blur(8px); z-index: -1;
@@ -41,15 +99,13 @@ button { cursor: pointer; }
 
 .detail-content { padding: 20px; padding-top: 100px; max-width: 800px; margin: 0 auto; position: relative; }
 
-/* Üst Kısım (Kapak + Bilgi) */
 .detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
-.detail-cover { width: 160px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 20px; }
-.detail-title { font-size: 28px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.detail-cover { width: 150px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 20px; }
+.detail-title { font-size: 26px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
 .detail-meta { display: flex; gap: 10px; font-size: 12px; color: #ccc; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
 .meta-badge { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
 
-/* Aksiyon Butonları */
 .action-buttons { display: flex; gap: 15px; width: 100%; max-width: 400px; margin-bottom: 30px; }
 .btn-read { flex: 1; background: #d32f2f; color: white; border: none; padding: 14px; border-radius: 30px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); }
 .btn-icon { width: 50px; background: #333; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -60,7 +116,7 @@ button { cursor: pointer; }
 .summary-text { font-size: 14px; line-height: 1.6; color: #ddd; }
 
 /* Bölüm Listesi */
-.chapter-list-container { background: #1e1e1e; border-radius: 15px; padding: 10px; margin-bottom: 50px; }
+.chapter-list-container { background: #1e1e1e; border-radius: 15px; padding: 10px; margin-bottom: 30px; }
 .chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
 .chapter-item:active { background: #333; }
@@ -68,11 +124,20 @@ button { cursor: pointer; }
 .chapter-name { font-weight: 500; font-size: 15px; }
 .chapter-date { font-size: 11px; color: #666; margin-top: 4px; }
 
-/* Geri Butonu (Yuvarlak) */
 .back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; }
 
 /* --- OKUYUCU MODU --- */
-#reader-view { display: none; background: #000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2500; overflow-y: auto; }
+#reader-view { 
+    display: none; /* BAŞLANGIÇTA GİZLİ OLMALI */
+    background: #000; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: 2500; 
+    overflow-y: auto; 
+}
 .reader-header { position: sticky; top: 0; background: rgba(20,20,20,0.95); padding: 10px; display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #333; z-index: 2601; }
 .close-btn { background: #333; color: white; border: none; padding: 5px 15px; border-radius: 4px; }
 .reader-content img { width: 100%; display: block; image-rendering: high-quality; transform: translateZ(0); }
@@ -82,3 +147,4 @@ button { cursor: pointer; }
 .nav-item { color: #666; text-align: center; font-size: 10px; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #fff; }
+             
