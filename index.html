@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manga Okuyucu</title>
+<style>
+    body { background-color: #121212; color: #ddd; margin: 0; padding: 0; font-family: sans-serif; }
+    .header { background: #222; padding: 10px; text-align: center; position: sticky; top: 0; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; }
+    select, button { padding: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; cursor: pointer; }
+    .viewer { max-width: 800px; margin: 0 auto; background: #000; min-height: 100vh; }
+    .viewer img { width: 100%; display: block; } /* Webtoon modu */
+</style>
+</head>
+<body>
+
+<div class="header">
+    <select id="seriesSelect" onchange="updateChapters()"></select>
+    <select id="chapterSelect" onchange="loadManga()"></select>
+    <button onclick="nextChapter()">Sonraki Bölüm</button>
+</div>
+
+<div class="viewer" id="comicContainer"></div>
+
+<script>
+// --- SEN SADECE BURAYI DEĞİŞTİRECEKSİN ---
+const arsiv = {
+    "Batman": {
+        "KullaniciAdi": "SENIN_GITHUB_KULLANICI_ADIN",  // Buraya kullanıcı adını yaz
+        "RepoAdi": "Manga-Arsiv-1",
+        "Bolumler": {
+            "1": 20,  // 1. Bölüm 20 resimden oluşuyor
+            "2": 25   // 2. Bölüm 25 resimden oluşuyor
+        }
+    },
+    "Spiderman": {
+        "KullaniciAdi": "SENIN_GITHUB_KULLANICI_ADIN",
+        "RepoAdi": "Manga-Arsiv-1",
+        "Bolumler": {
+            "1": 15
+        }
+    }
+};
+// ------------------------------------------
+
+const seriesSelect = document.getElementById('seriesSelect');
+const chapterSelect = document.getElementById('chapterSelect');
+const viewer = document.getElementById('comicContainer');
+
+function init() {
+    for (let s in arsiv) {
+        let opt = document.createElement("option");
+        opt.text = s; opt.value = s;
+        seriesSelect.add(opt);
+    }
+    updateChapters();
+}
+
+function updateChapters() {
+    chapterSelect.innerHTML = "";
+    let s = seriesSelect.value;
+    let chapters = arsiv[s].Bolumler;
+    for (let c in chapters) {
+        let opt = document.createElement("option");
+        opt.text = "Bölüm " + c; opt.value = c;
+        chapterSelect.add(opt);
+    }
+    loadManga();
+}
+
+function loadManga() {
+    viewer.innerHTML = "";
+    window.scrollTo(0,0);
+    let s = seriesSelect.value;
+    let c = chapterSelect.value;
+    let veri = arsiv[s];
+    let sayfaSayisi = veri.Bolumler[c];
+
+    for (let i = 1; i <= sayfaSayisi; i++) {
+        let sayfa = i.toString().padStart(2, '0'); // 01, 02 yapar
+        // Linki Oluştur
+        let img = document.createElement("img");
+        img.src = `https://cdn.jsdelivr.net/gh/${veri.KullaniciAdi}/${veri.RepoAdi}/${s}/${c}/${sayfa}.jpg`;
+        viewer.appendChild(img);
+    }
+}
+
+function nextChapter() {
+    let current = parseInt(chapterSelect.value);
+    chapterSelect.value = (current + 1).toString();
+    if(chapterSelect.value === "") alert("Son Bölüm!");
+    else loadManga();
+}
+
+init();
+</script>
+</body>
+</html>
