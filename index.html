@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D3 Manga Okuyucu</title>
+<title>Manga Okuyucu</title>
 <style>
     body { background-color: #121212; color: #ddd; margin: 0; font-family: sans-serif; }
     .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; }
@@ -29,17 +29,24 @@
     const cSel = document.getElementById('cSelect');
     const box = document.getElementById('box');
 
-    // CSV OKUMA (Sıralama: Seri, Kullanıcı, Repo, Bölüm, Sayfa)
+    // CSV OKUMA (YENİ FORMAT: Görünen İsim, Klasör, Kullanıcı, Depo, Bölüm, Sayfa)
     fetch('liste.csv?t=' + Date.now()).then(r => r.text()).then(t => {
         sSel.innerHTML = ""; 
         t.split('\n').forEach(l => {
             let d = l.split(',').map(x => x.trim());
-            if(d.length < 5) return;
+            if(d.length < 6) return; // 6 Sütun kontrolü
             
-            let [seri, user, repo, bolum, sayfa] = d;
+            // YENİ YAPIYI BURADA ÇÖZÜYORUZ
+            let [gorunenAd, klasorAd, user, repo, bolum, sayfa] = d;
 
-            if(!ARSIV[seri]) ARSIV[seri] = { bolumler: {} };
-            ARSIV[seri].bolumler[bolum] = { u: user, r: repo, s: parseInt(sayfa) };
+            if(!ARSIV[gorunenAd]) ARSIV[gorunenAd] = { bolumler: {}, klasor: klasorAd };
+            
+            ARSIV[gorunenAd].bolumler[bolum] = { 
+                u: user, 
+                r: repo, 
+                s: parseInt(sayfa),
+                k: klasorAd // Klasör adını sakla
+            };
         });
         
         Object.keys(ARSIV).sort().forEach(s => {
@@ -71,8 +78,10 @@
         for(let i=1; i<=data.s; i++) {
             let img = document.createElement("img");
             let sayfa = i.toString().padStart(2,'0'); 
-            // DİKKAT: Burası senin toonarc hesabından çekecek
-            img.src = `https://cdn.jsdelivr.net/gh/${data.u}/${data.r}/${s}/${b}/${sayfa}.jpg`;
+            
+            // LİNK OLUŞTURURKEN "GÖRÜNEN ADI" DEĞİL "KLASÖR ADINI" (data.k) KULLANIYORUZ
+            img.src = `https://cdn.jsdelivr.net/gh/${data.u}/${data.r}/${data.k}/${b}/${sayfa}.jpg`;
+            
             img.loading = "lazy";
             img.onerror = function(){ this.style.display="none"; };
             box.appendChild(img);
