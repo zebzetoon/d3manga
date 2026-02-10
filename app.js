@@ -2,7 +2,7 @@ const CACHE_ID = Date.now();
 const IS_MOBILE = window.innerWidth < 768;
 const MAX_SAYFA = 100;
 let ARSIV = {}; 
-let currentSeri = null; // Değişken adını da güncelledik
+let currentSeri = null;
 
 // 1. BAŞLANGIÇ: CSV OKU VE URL KONTROL ET
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,19 +10,34 @@ document.addEventListener("DOMContentLoaded", () => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
+        // Satırlara böl
         let rows = t.split('\n');
+
+        // --- GÜVENLİK DUVARI 1: İLK SATIRI DİREKT SİL ---
+        // Excel başlık satırını hafızadan siliyoruz.
+        if (rows.length > 0) rows.shift(); 
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
             
-            // Filtreleme
+            // --- GÜVENLİK DUVARI 2: BOŞ SATIRLARI ATLA ---
             if(d.length < 5) return;
-            if(d[0].toLowerCase().includes("isim")) return; 
+
+            // --- GÜVENLİK DUVARI 3: İÇERİK KONTROLÜ ---
+            // Eğer ilk sütun hala "İsim" ise veya boşsa atla
+            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, ""); // Gizli karakterleri temizle
+            if (kontrolIsim === "isim" || d[0] === "") return;
 
             // CSV SÜTUNLARI
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // Veri Kontrolü
+            // --- GÜVENLİK DUVARI 4: "ARALIK" KONTROLÜ ---
+            // Eğer 5. sütun (Aralık) bir sayı veya "1-10" gibi bir şey değilse, bu bir başlıktır. Atla.
+            // Başlık satırında burada "Aralık" yazar, sayı yazmaz.
+            if (isNaN(parseInt(aralik))) return;
+
+
+            // Veri Kontrolü (Eksikleri tamamla)
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner || banner === "") banner = kapak; 
             if(!ozet) ozet = "Özet bilgisi girilmedi.";
@@ -53,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 durumHtml = `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
             }
 
-            // BURADA "Manga" YAZISINI "Seri" YAPTIK
             let cardHtml = `
             <div class="manga-card" onclick="openDetail('${isim}')">
                 <div class="card-img-container">
@@ -69,9 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.innerHTML += cardHtml;
         });
 
-        // --- URL KONTROLÜ (ARTIK ?seri= OLARAK ÇALIŞIR) ---
+        // --- URL KONTROLÜ ---
         const urlParams = new URLSearchParams(window.location.search);
-        const urlSeri = urlParams.get('seri'); // ?manga yerine ?seri arıyoruz
+        const urlSeri = urlParams.get('seri');
         const urlBolum = urlParams.get('bolum');
 
         if (urlSeri && ARSIV[urlSeri]) {
@@ -91,7 +105,7 @@ function openDetail(isim) {
     let data = ARSIV[isim];
     if(!data) return;
 
-    // URL GÜNCELLEME: ?seri=İsim
+    // URL GÜNCELLEME
     const newUrl = `?seri=${encodeURIComponent(isim)}`;
     window.history.pushState({path: newUrl}, '', newUrl);
 
@@ -128,7 +142,6 @@ function openDetail(isim) {
 }
 
 function closeDetail() {
-    // URL Temizle
     const baseUrl = window.location.pathname;
     window.history.pushState({}, '', baseUrl);
 
@@ -140,7 +153,6 @@ function closeDetail() {
 function openReader(isim, bolumNo = null) {
     if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
 
-    // URL GÜNCELLEME: ?seri=İsim&bolum=5
     const newUrl = `?seri=${encodeURIComponent(isim)}&bolum=${bolumNo}`;
     window.history.pushState({path: newUrl}, '', newUrl);
 
@@ -162,7 +174,6 @@ function openReader(isim, bolumNo = null) {
 }
 
 function closeReader() {
-    // Geri dönünce URL'yi detay sayfasına çek (?seri=...)
     const newUrl = `?seri=${encodeURIComponent(currentSeri)}`;
     window.history.pushState({path: newUrl}, '', newUrl);
 
@@ -176,7 +187,6 @@ function resimGetir() {
     const b = document.getElementById('cSelect').value;
     let veri = ARSIV[currentSeri];
     
-    // Bölüm değiştikçe URL güncelle
     const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
     window.history.pushState({path: newUrl}, '', newUrl);
 
