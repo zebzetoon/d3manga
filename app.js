@@ -4,27 +4,33 @@ const MAX_SAYFA = 100;
 let ARSIV = {}; 
 let currentManga = null;
 
-// 1. CSV OKU VE LİSTELE (11 SÜTUN)
+// 1. CSV OKU VE LİSTELE
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
-        t.split('\n').forEach((l) => {
-            let d = l.split(',').map(x => x.trim());
-            // Başlık satırını veya eksik satırları atla
-            if(d.length < 5 || d[0].toLowerCase() === "isim") return; 
+        // --- DÜZELTME BURADA ---
+        // split('\n') ile satırlara bölüyoruz.
+        // .slice(1) diyerek EN ÜSTTEKİ başlık satırını (İsim, Klasör...) atıyoruz.
+        let rows = t.split('\n').slice(1); 
 
-            // CSV SIRASI: 
+        rows.forEach((l) => {
+            let d = l.split(',').map(x => x.trim());
+            
+            // Eğer satır boşsa atla (Uzunluk kontrolü)
+            if(d.length < 5) return; 
+
+            // CSV SÜTUNLARI: 
             // 0:İsim, 1:Klasör, 2:User, 3:Repo, 4:Aralık, 
             // 5:Kapak, 6:Banner, 7:Tür, 8:Durum, 9:Yazar, 10:Özet
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // Veri Eksikse Doldur (Hata vermesin)
+            // Veri Eksikse Doldur (Hata vermesin diye)
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner || banner === "") banner = kapak; 
-            if(!ozet) ozet = "Özet bilgisi henüz girilmedi.";
-            if(!yazar) yazar = "Anonim";
+            if(!ozet) ozet = "Özet bilgisi girilmedi.";
+            if(!yazar) yazar = "Bilinmiyor";
 
             // Arşive Kaydet
             if(!ARSIV[isim]) ARSIV[isim] = { 
@@ -44,9 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
             // Kart HTML Oluştur
-            let durumHtml = durum.toLowerCase().includes("tamam") ? 
-                `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
-                `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
+            let durumHtml = "";
+            if(durum && durum.toLowerCase().includes("tamam")) {
+                durumHtml = `<div class="tag tag-status tag-completed">Tamamlandı</div>`;
+            } else {
+                durumHtml = `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
+            }
 
             let cardHtml = `
             <div class="manga-card" onclick="openDetail('${isim}')">
@@ -69,7 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
 function openDetail(isim) {
     currentManga = isim;
     let data = ARSIV[isim];
-    if(!data) return;
+    if(!data) {
+        console.error("Manga verisi bulunamadı:", isim);
+        return;
+    }
 
     // Verileri Yerleştir
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
@@ -80,7 +92,7 @@ function openDetail(isim) {
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
 
-    // Bölüm Listesini Oluştur (En yeniden en eskiye)
+    // Bölüm Listesini Oluştur
     const listContainer = document.getElementById('chapter-list-box');
     listContainer.innerHTML = "";
     
@@ -90,7 +102,7 @@ function openDetail(isim) {
         item.innerHTML = `
             <div>
                 <div class="chapter-name">Bölüm ${b}</div>
-                <div class="chapter-date">Müsait</div>
+                <div class="chapter-date">Yayında</div>
             </div>
             <i class="fas fa-chevron-right" style="color:#555;"></i>
         `;
@@ -130,7 +142,7 @@ function openReader(isim, bolumNo = null) {
 
 function closeReader() {
     document.getElementById('reader-view').style.display = 'none';
-    document.getElementById('detail-view').style.display = 'block'; // Detaya dön
+    document.getElementById('detail-view').style.display = 'block'; 
     document.getElementById('box').innerHTML = ""; 
 }
 
@@ -140,6 +152,9 @@ function resimGetir() {
     let veri = ARSIV[currentManga];
     
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
+    // Okuyucunun tepesine git
+    document.getElementById('reader-view').scrollTop = 0;
+
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
     box.innerHTML = "";
@@ -170,5 +185,5 @@ function createUrl(baseUrl, number, ext) {
 function sonraki() { 
     const cSel = document.getElementById('cSelect');
     if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
-    else { alert("Bitti!"); } 
-}
+    else { alert("Bölüm Bitti!"); } 
+                }
