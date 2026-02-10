@@ -2,35 +2,31 @@ const CACHE_ID = Date.now();
 const IS_MOBILE = window.innerWidth < 768;
 const MAX_SAYFA = 100;
 let ARSIV = {}; 
-let currentManga = null;
+let currentSeri = null; // Değişken adını da güncelledik
 
-// 1. CSV OKU VE LİSTELE
+// 1. BAŞLANGIÇ: CSV OKU VE URL KONTROL ET
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
-        // --- DÜZELTME BURADA ---
-        // split('\n') ile satırlara bölüyoruz.
-        // .slice(1) diyerek EN ÜSTTEKİ başlık satırını (İsim, Klasör...) atıyoruz.
-        let rows = t.split('\n').slice(1); 
+        let rows = t.split('\n');
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
             
-            // Eğer satır boşsa atla (Uzunluk kontrolü)
-            if(d.length < 5) return; 
+            // Filtreleme
+            if(d.length < 5) return;
+            if(d[0].toLowerCase().includes("isim")) return; 
 
-            // CSV SÜTUNLARI: 
-            // 0:İsim, 1:Klasör, 2:User, 3:Repo, 4:Aralık, 
-            // 5:Kapak, 6:Banner, 7:Tür, 8:Durum, 9:Yazar, 10:Özet
+            // CSV SÜTUNLARI
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
 
-            // Veri Eksikse Doldur (Hata vermesin diye)
+            // Veri Kontrolü
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner || banner === "") banner = kapak; 
             if(!ozet) ozet = "Özet bilgisi girilmedi.";
-            if(!yazar) yazar = "Bilinmiyor";
+            if(!yazar) yazar = "Anonim";
 
             // Arşive Kaydet
             if(!ARSIV[isim]) ARSIV[isim] = { 
@@ -38,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 meta: { kapak, tur, durum, yazar, banner, ozet }
             };
             
-            // Bölüm Sayılarını Hesapla
+            // Bölüm Hesapla
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
@@ -49,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // Kart HTML Oluştur
+            // Kart HTML
             let durumHtml = "";
             if(durum && durum.toLowerCase().includes("tamam")) {
                 durumHtml = `<div class="tag tag-status tag-completed">Tamamlandı</div>`;
@@ -57,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 durumHtml = `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
             }
 
+            // BURADA "Manga" YAZISINI "Seri" YAPTIK
             let cardHtml = `
             <div class="manga-card" onclick="openDetail('${isim}')">
                 <div class="card-img-container">
@@ -66,24 +63,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="card-info">
                     <div class="card-title">${isim}</div>
-                    <div class="card-genre">${tur || 'Manga'}</div>
+                    <div class="card-genre">${tur || 'Seri'}</div>
                 </div>
             </div>`;
             grid.innerHTML += cardHtml;
         });
+
+        // --- URL KONTROLÜ (ARTIK ?seri= OLARAK ÇALIŞIR) ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSeri = urlParams.get('seri'); // ?manga yerine ?seri arıyoruz
+        const urlBolum = urlParams.get('bolum');
+
+        if (urlSeri && ARSIV[urlSeri]) {
+            if (urlBolum) {
+                openReader(urlSeri, urlBolum);
+            } else {
+                openDetail(urlSeri);
+            }
+        }
+
     });
 });
 
 // 2. DETAY SAYFASINI AÇ
 function openDetail(isim) {
-    currentManga = isim;
+    currentSeri = isim;
     let data = ARSIV[isim];
-    if(!data) {
-        console.error("Manga verisi bulunamadı:", isim);
-        return;
-    }
+    if(!data) return;
 
-    // Verileri Yerleştir
+    // URL GÜNCELLEME: ?seri=İsim
+    const newUrl = `?seri=${encodeURIComponent(isim)}`;
+    window.history.pushState({path: newUrl}, '', newUrl);
+
+    // Verileri Doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -92,7 +104,6 @@ function openDetail(isim) {
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
 
-    // Bölüm Listesini Oluştur
     const listContainer = document.getElementById('chapter-list-box');
     listContainer.innerHTML = "";
     
@@ -110,13 +121,17 @@ function openDetail(isim) {
         listContainer.appendChild(item);
     });
 
-    // Ekranı Değiştir
     document.getElementById('home-view').style.display = 'none';
+    document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
     window.scrollTo(0,0);
 }
 
 function closeDetail() {
+    // URL Temizle
+    const baseUrl = window.location.pathname;
+    window.history.pushState({}, '', baseUrl);
+
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
 }
@@ -125,10 +140,16 @@ function closeDetail() {
 function openReader(isim, bolumNo = null) {
     if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
 
+    // URL GÜNCELLEME: ?seri=İsim&bolum=5
+    const newUrl = `?seri=${encodeURIComponent(isim)}&bolum=${bolumNo}`;
+    window.history.pushState({path: newUrl}, '', newUrl);
+
+    currentSeri = isim; 
+
+    document.getElementById('home-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'block';
     
-    // Select Kutusunu Doldur
     const cSel = document.getElementById('cSelect');
     cSel.innerHTML = "";
     ARSIV[isim].bolumler.forEach(b => {
@@ -141,6 +162,10 @@ function openReader(isim, bolumNo = null) {
 }
 
 function closeReader() {
+    // Geri dönünce URL'yi detay sayfasına çek (?seri=...)
+    const newUrl = `?seri=${encodeURIComponent(currentSeri)}`;
+    window.history.pushState({path: newUrl}, '', newUrl);
+
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block'; 
     document.getElementById('box').innerHTML = ""; 
@@ -149,10 +174,13 @@ function closeReader() {
 function resimGetir() {
     const box = document.getElementById('box');
     const b = document.getElementById('cSelect').value;
-    let veri = ARSIV[currentManga];
+    let veri = ARSIV[currentSeri];
     
+    // Bölüm değiştikçe URL güncelle
+    const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
+    window.history.pushState({path: newUrl}, '', newUrl);
+
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
-    // Okuyucunun tepesine git
     document.getElementById('reader-view').scrollTop = 0;
 
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
@@ -185,5 +213,5 @@ function createUrl(baseUrl, number, ext) {
 function sonraki() { 
     const cSel = document.getElementById('cSelect');
     if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
-    else { alert("Bölüm Bitti!"); } 
-                }
+    else { alert("Bitti!"); } 
+}
