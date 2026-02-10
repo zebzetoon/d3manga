@@ -1,19 +1,66 @@
-
-/* --- GENEL TASARIM (DARK MODE) --- */
-body { background-color: #000; color: #fff; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 70px; }
-a { text-decoration: none; color: white; }
-
-/* --- ANA SAYFA IZGARASI --- */
-.app-container { padding: 15px; display: block; }
-.section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
-.section-title span { color: #888; font-size: 12px; }
-
-.manga-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Mobilde yan yana 2 tane */
-    gap: 15px;
+/* --- GENEL AYARLAR --- */
+body { 
+    background-color: #000; 
+    color: #fff; 
+    margin: 0; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding-bottom: 80px; /* Alt menü için boşluk */
+    overflow-x: hidden; /* Yanlara taşmayı engelle */
 }
 
+a { text-decoration: none; color: white; }
+
+/* --- ANA SAYFA DÜZENİ --- */
+.app-container { 
+    padding: 15px; 
+    display: block;
+    min-height: 100vh; /* Sayfanın uzamasına izin ver */
+}
+
+/* Banner Ayarı */
+.banner {
+    width: 100%; 
+    height: 180px; 
+    background: #111; 
+    border-radius: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 20px; 
+    background-image: linear-gradient(45deg, #d32f2f, #000);
+}
+
+.section-title { 
+    font-size: 18px; 
+    font-weight: bold; 
+    margin: 20px 0 10px 0; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.section-title span { color: #888; font-size: 12px; cursor: pointer; }
+
+/* --- IZGARA SİSTEMİ (EN ÖNEMLİ KISIM) --- */
+.manga-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mobilde 2 sütun */
+    gap: 15px;
+    padding-bottom: 20px;
+}
+
+/* --- PC İÇİN ÖZEL AYAR (MEDYA SORGUSU) --- */
+@media (min-width: 768px) {
+    .manga-grid {
+        grid-template-columns: repeat(5, 1fr); /* PC'de yan yana 5 tane! */
+        gap: 20px;
+    }
+    .app-container {
+        max-width: 1200px; /* İçeriği ortala, çok yayılmasın */
+        margin: 0 auto;
+    }
+}
+
+/* --- KART TASARIMI --- */
 .manga-card {
     background: transparent;
     border-radius: 8px;
@@ -22,7 +69,7 @@ a { text-decoration: none; color: white; }
     cursor: pointer;
     transition: transform 0.2s;
 }
-.manga-card:active { transform: scale(0.98); }
+.manga-card:hover { transform: translateY(-5px); } /* PC'de mouse gelince zıplasın */
 
 .card-img-container {
     width: 100%;
@@ -30,19 +77,37 @@ a { text-decoration: none; color: white; }
     position: relative;
     border-radius: 12px;
     overflow: hidden;
+    background: #222; /* Resim yüklenirken gri görünsün */
 }
 
 .card-img {
     width: 100%; height: 100%; object-fit: cover;
 }
 
-/* Etiketler (Yeni, Tamamlandı) */
+/* --- ETİKETLERİ DÜZELTTİK --- */
 .tag {
-    position: absolute; top: 10px; left: 10px;
-    padding: 4px 8px; border-radius: 4px;
-    font-size: 10px; font-weight: bold; color: white;
+    position: absolute; 
+    padding: 4px 8px; 
+    border-radius: 4px;
+    font-size: 10px; 
+    font-weight: bold; 
+    color: white;
+    z-index: 10;
 }
-.tag-new { background: rgba(0,0,0,0.6); border: 1px solid #fff; }
+
+/* "Yeni" etiketi SAĞ üstte */
+.tag-new { 
+    top: 8px; 
+    right: 8px; 
+    background: rgba(0,0,0,0.7); 
+    border: 1px solid #fff; 
+}
+
+/* "Devam/Tamam" etiketi SOL üstte */
+.tag-status { 
+    top: 8px; 
+    left: 8px; 
+}
 .tag-completed { background: #d32f2f; }
 .tag-ongoing { background: #388e3c; }
 
@@ -50,22 +115,31 @@ a { text-decoration: none; color: white; }
 .card-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-genre { font-size: 11px; color: #aaa; margin-top: 2px; }
 
-/* --- OKUYUCU MODU (GİZLİ) --- */
-#reader-view { display: none; background: #000; min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; overflow-y: auto; }
+/* --- OKUYUCU MODU --- */
+#reader-view { 
+    display: none; 
+    background: #000; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    z-index: 2000; 
+    overflow-y: auto; /* Okuyucu içinde scroll çalışsın */
+}
 .reader-header { 
     position: sticky; top: 0; background: rgba(20,20,20,0.95); 
     padding: 10px; display: flex; gap: 10px; justify-content: center;
     border-bottom: 1px solid #333; z-index: 2001;
 }
 .close-btn { background: #d32f2f; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
-.reader-content img { width: 100%; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality; transform: translateZ(0); }
+.reader-content { padding-bottom: 50px; min-height: 100vh; }
+.reader-content img { width: 100%; display: block; image-rendering: high-quality; transform: translateZ(0); }
 
-/* --- ALT MENÜ (BOTTOM NAV) --- */
+/* --- ALT MENÜ --- */
 .bottom-nav {
     position: fixed; bottom: 0; left: 0; width: 100%;
     background: #000; border-top: 1px solid #222;
     display: flex; justify-content: space-around;
-    padding: 10px 0; z-index: 1000;
+    padding: 12px 0; z-index: 1000;
 }
 .nav-item { color: #666; text-align: center; font-size: 10px; cursor: pointer; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
