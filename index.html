@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>D3 Manga Okuyucu</title>
+<title>Manga Okuyucu</title>
 <style>
     body { background-color: #121212; color: #ddd; margin: 0; font-family: sans-serif; }
     .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; }
@@ -34,8 +34,10 @@
         sSel.innerHTML = ""; 
         t.split('\n').forEach(l => {
             let d = l.split(',').map(x => x.trim());
+            // Eğer satır boşsa veya eksikse atla
             if(d.length < 6) return;
             
+            // CSV SIRALAMASI: İsim, Klasör, Kullanıcı, Depo, Bölüm, Sayfa
             let [gorunenAd, klasorAd, user, repo, bolum, sayfa] = d;
 
             if(!ARSIV[gorunenAd]) ARSIV[gorunenAd] = { bolumler: {}, klasor: klasorAd };
@@ -43,8 +45,8 @@
             ARSIV[gorunenAd].bolumler[bolum] = { 
                 u: user, 
                 r: repo, 
-                s: parseInt(sayfa),
-                k: klasorAd 
+                k: klasorAd, // Klasör adı burada çok önemli
+                s: parseInt(sayfa)
             };
         });
         
@@ -77,38 +79,24 @@
         for(let i=1; i<=data.s; i++) {
             let img = document.createElement("img");
             
-            // --- AKILLI YÜKLEME SİSTEMİ BAŞLANGICI ---
-            // İlk olarak "01.jpg" formatını dener (En yaygın olan)
+            // TEST 1 URL YAPISINI OLUŞTURUYORUZ
+            // https://cdn.jsdelivr.net/gh/toonarc/olum-pakti/olum-pakti/1/01.jpg
             let baseSrc = `https://cdn.jsdelivr.net/gh/${data.u}/${data.r}/${data.k}/${b}/`;
             
-            img.dataset.sayi = i; // Resmin numarasını hafızaya al
-            img.src = baseSrc + i.toString().padStart(2, '0') + ".jpg"; // Önce 01.jpg dene
+            // Akıllı dosya bulucu (01.jpg veya 1.jpg)
+            img.dataset.sayi = i;
+            img.src = baseSrc + i.toString().padStart(2, '0') + ".jpg"; 
             img.loading = "lazy";
-
-            // Eğer resim açılmazsa (onerror), sırasıyla diğer formatları dener
+            
             img.onerror = function() {
+                // Eğer 01.jpg yoksa 1.jpg dene
                 let sayi = this.dataset.sayi;
-                let currentSrc = this.src;
-
-                // 1. YEDEK: Eğer 01.jpg yoksa -> 1.jpg dene (Sıfırsız)
-                if (currentSrc.includes("/" + sayi.toString().padStart(2,'0') + ".jpg")) {
+                if (this.src.includes("/" + sayi.toString().padStart(2,'0') + ".jpg")) {
                     this.src = baseSrc + sayi + ".jpg";
-                }
-                // 2. YEDEK: Eğer 1.jpg yoksa -> 001.jpg dene (3 haneli)
-                else if (currentSrc.endsWith("/" + sayi + ".jpg")) {
-                    this.src = baseSrc + sayi.toString().padStart(3,'0') + ".jpg";
-                }
-                // 3. YEDEK: Eğer 001.jpg yoksa -> 0001.jpg dene (4 haneli)
-                else if (currentSrc.includes("/" + sayi.toString().padStart(3,'0') + ".jpg")) {
-                    this.src = baseSrc + sayi.toString().padStart(4,'0') + ".jpg";
-                }
-                // HİÇBİRİ YOKSA: Vazgeç ve gizle
-                else {
+                } else {
                     this.style.display = "none";
                 }
             };
-            // --- AKILLI SİSTEM BİTİŞİ ---
-
             box.appendChild(img);
         }
     }
