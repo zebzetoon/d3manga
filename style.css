@@ -1,1 +1,72 @@
 
+/* --- GENEL TASARIM (DARK MODE) --- */
+body { background-color: #000; color: #fff; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 70px; }
+a { text-decoration: none; color: white; }
+
+/* --- ANA SAYFA IZGARASI --- */
+.app-container { padding: 15px; display: block; }
+.section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
+.section-title span { color: #888; font-size: 12px; }
+
+.manga-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mobilde yan yana 2 tane */
+    gap: 15px;
+}
+
+.manga-card {
+    background: transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.manga-card:active { transform: scale(0.98); }
+
+.card-img-container {
+    width: 100%;
+    aspect-ratio: 2/3; /* Dikey Poster Oranı */
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+
+/* Etiketler (Yeni, Tamamlandı) */
+.tag {
+    position: absolute; top: 10px; left: 10px;
+    padding: 4px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: bold; color: white;
+}
+.tag-new { background: rgba(0,0,0,0.6); border: 1px solid #fff; }
+.tag-completed { background: #d32f2f; }
+.tag-ongoing { background: #388e3c; }
+
+.card-info { padding-top: 8px; }
+.card-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-genre { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+/* --- OKUYUCU MODU (GİZLİ) --- */
+#reader-view { display: none; background: #000; min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; overflow-y: auto; }
+.reader-header { 
+    position: sticky; top: 0; background: rgba(20,20,20,0.95); 
+    padding: 10px; display: flex; gap: 10px; justify-content: center;
+    border-bottom: 1px solid #333; z-index: 2001;
+}
+.close-btn { background: #d32f2f; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+.reader-content img { width: 100%; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: high-quality; transform: translateZ(0); }
+
+/* --- ALT MENÜ (BOTTOM NAV) --- */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #000; border-top: 1px solid #222;
+    display: flex; justify-content: space-around;
+    padding: 10px 0; z-index: 1000;
+}
+.nav-item { color: #666; text-align: center; font-size: 10px; cursor: pointer; }
+.nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
+.nav-item.active { color: #fff; }
