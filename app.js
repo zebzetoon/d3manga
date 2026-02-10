@@ -1,112 +1,155 @@
-// --- AYARLAR ---
 const CACHE_ID = Date.now();
 const IS_MOBILE = window.innerWidth < 768;
 const MAX_SAYFA = 100;
-
 let ARSIV = {}; 
 let currentManga = null;
 
-// 1. BAŞLANGIÇ
+// 1. CSV OKU VE LİSTELE (11 SÜTUN)
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const grid = document.getElementById('manga-list');
         grid.innerHTML = ""; 
         
-        t.split('\n').forEach((l, index) => {
+        t.split('\n').forEach((l) => {
             let d = l.split(',').map(x => x.trim());
-            if(d.length < 8) return; 
-            
-            let [isim, klasor, user, repo, aralik, kapak, tur, durum] = d;
+            // Başlık satırını veya eksik satırları atla
+            if(d.length < 5 || d[0].toLowerCase() === "isim") return; 
 
-            if(!ARSIV[isim]) ARSIV[isim] = { bolumler: {}, u: user, r: repo, k: klasor };
+            // CSV SIRASI: 
+            // 0:İsim, 1:Klasör, 2:User, 3:Repo, 4:Aralık, 
+            // 5:Kapak, 6:Banner, 7:Tür, 8:Durum, 9:Yazar, 10:Özet
+            let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
+
+            // Veri Eksikse Doldur (Hata vermesin)
+            if(!kapak) kapak = "https://via.placeholder.com/200x300";
+            if(!banner || banner === "") banner = kapak; 
+            if(!ozet) ozet = "Özet bilgisi henüz girilmedi.";
+            if(!yazar) yazar = "Anonim";
+
+            // Arşive Kaydet
+            if(!ARSIV[isim]) ARSIV[isim] = { 
+                bolumler: [], u: user, r: repo, k: klasor, 
+                meta: { kapak, tur, durum, yazar, banner, ozet }
+            };
             
+            // Bölüm Sayılarını Hesapla
             let baslangic, bitis;
             if (aralik.includes('-')) {
                 let p = aralik.split('-');
-                baslangic = parseInt(p[0]);
-                bitis = parseInt(p[1]);
+                baslangic = parseInt(p[0]); bitis = parseInt(p[1]);
             } else {
-                baslangic = parseInt(aralik);
-                bitis = parseInt(aralik);
+                baslangic = parseInt(aralik); bitis = parseInt(aralik);
             }
-            for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler[i] = true;
+            for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
+            ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // DURUM ETİKETİ (SOL ÜST)
-            let durumTag = "";
-            if(durum.toLowerCase().includes("tamam")) 
-                durumTag = `<div class="tag tag-status tag-completed"><i class="fas fa-lock"></i> Tamamlandı</div>`;
-            else 
-                durumTag = `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
-
-            // YENİ ETİKETİ (SAĞ ÜST) - Eğer istersen buraya tarih kontrolü de eklenir
-            let yeniTag = `<div class="tag tag-new">Yeni</div>`;
+            // Kart HTML Oluştur
+            let durumHtml = durum.toLowerCase().includes("tamam") ? 
+                `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
+                `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
 
             let cardHtml = `
-            <div class="manga-card" onclick="openReader('${isim}')">
+            <div class="manga-card" onclick="openDetail('${isim}')">
                 <div class="card-img-container">
-                    ${durumTag}
-                    ${yeniTag}
-                    <img src="${kapak}" class="card-img" loading="lazy" onerror="this.src='https://via.placeholder.com/200x300?text=Kapak'">
+                    ${durumHtml}
+                    <div class="tag tag-new">Yeni</div>
+                    <img src="${kapak}" class="card-img" loading="lazy">
                 </div>
                 <div class="card-info">
                     <div class="card-title">${isim}</div>
-                    <div class="card-genre">${tur}</div>
+                    <div class="card-genre">${tur || 'Manga'}</div>
                 </div>
             </div>`;
-            
             grid.innerHTML += cardHtml;
         });
     });
 });
 
-// 2. OKUYUCU FONKSİYONLARI
-function openReader(isim) {
+// 2. DETAY SAYFASINI AÇ
+function openDetail(isim) {
     currentManga = isim;
-    // Sayfa kaydırmayı kilitle (Arka plan oynamasın)
-    document.body.style.overflow = 'hidden'; 
+    let data = ARSIV[isim];
+    if(!data) return;
+
+    // Verileri Yerleştir
+    document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
+    document.getElementById('detail-cover-img').src = data.meta.kapak;
+    document.getElementById('detail-title-text').innerText = isim;
+    document.getElementById('detail-author').innerText = data.meta.yazar;
+    document.getElementById('detail-genre').innerText = data.meta.tur;
+    document.getElementById('detail-summary').innerText = data.meta.ozet;
+    document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
+
+    // Bölüm Listesini Oluştur (En yeniden en eskiye)
+    const listContainer = document.getElementById('chapter-list-box');
+    listContainer.innerHTML = "";
+    
+    [...data.bolumler].reverse().forEach(b => {
+        let item = document.createElement("div");
+        item.className = "chapter-item";
+        item.innerHTML = `
+            <div>
+                <div class="chapter-name">Bölüm ${b}</div>
+                <div class="chapter-date">Müsait</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:#555;"></i>
+        `;
+        item.onclick = () => openReader(isim, b);
+        listContainer.appendChild(item);
+    });
+
+    // Ekranı Değiştir
     document.getElementById('home-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block';
+    window.scrollTo(0,0);
+}
+
+function closeDetail() {
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('home-view').style.display = 'block';
+}
+
+// 3. OKUYUCU MODUNU AÇ
+function openReader(isim, bolumNo = null) {
+    if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
+
+    document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'block';
     
+    // Select Kutusunu Doldur
     const cSel = document.getElementById('cSelect');
     cSel.innerHTML = "";
-    Object.keys(ARSIV[isim].bolumler).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(b => {
-        let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; cSel.add(o);
+    ARSIV[isim].bolumler.forEach(b => {
+        let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; 
+        if(b == bolumNo) o.selected = true;
+        cSel.add(o);
     });
     
     resimGetir();
 }
 
 function closeReader() {
-    // Sayfa kaydırmayı aç
-    document.body.style.overflow = 'auto';
-    document.getElementById('home-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block'; // Detaya dön
     document.getElementById('box').innerHTML = ""; 
 }
 
 function resimGetir() {
     const box = document.getElementById('box');
-    const cSel = document.getElementById('cSelect');
-    let b = cSel.value;
+    const b = document.getElementById('cSelect').value;
     let veri = ARSIV[currentManga];
     
     box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
-    // Okuyucunun en tepesine git
-    document.getElementById('reader-view').scrollTop = 0;
-    
     let klasorYolu = veri.k === "." ? "" : veri.k + "/";
 
     box.innerHTML = "";
     for(let i=1; i<=MAX_SAYFA; i++) {
         let img = document.createElement("img");
         let rawBase = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${klasorYolu}${b}/`;
-        
         img.dataset.sayi = i;
         img.dataset.rawbase = rawBase;
-        
         img.src = createUrl(rawBase, i, ".jpg");
         img.loading = "lazy";
-
         img.onerror = function() {
             let sayi = this.dataset.sayi;
             let raw = this.dataset.rawbase;
@@ -127,5 +170,5 @@ function createUrl(baseUrl, number, ext) {
 function sonraki() { 
     const cSel = document.getElementById('cSelect');
     if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
-    else { alert("Bölüm Bitti!"); closeReader(); } 
-                }
+    else { alert("Bitti!"); } 
+}
