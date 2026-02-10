@@ -3,92 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manga Okuyucu</title>
+<title>D3 Manga Okuyucu</title>
 <style>
-    /* SİTE TASARIMI */
     body { background-color: #121212; color: #ddd; margin: 0; font-family: sans-serif; }
-    .header { background: #222; padding: 15px; text-align: center; position: sticky; top: 0; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; z-index: 999; }
-    select, button { padding: 10px; background: #333; color: white; border: 1px solid #555; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    .header { background: #1f1f1f; padding: 10px; text-align: center; position: sticky; top: 0; z-index: 999; border-bottom: 3px solid #ff4500; display: flex; justify-content: center; gap: 10px; }
+    select, button { padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; font-size: 16px; cursor: pointer;}
     .viewer { max-width: 800px; margin: 0 auto; background: #000; min-height: 100vh; }
     .viewer img { width: 100%; display: block; }
+    .loading { text-align: center; padding: 50px; color: #888; }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <select id="seriesSelect" onchange="bolumleriGetir()">
-        <option>Yükleniyor...</option>
-    </select>
-    <select id="chapterSelect" onchange="resimleriGetir()"></select>
-    <button onclick="sonrakiBolum()">Sonraki Bölüm &gt;</button>
+    <select id="sSelect" onchange="bolumGetir()"><option>Yükleniyor...</option></select>
+    <select id="cSelect" onchange="resimGetir()"></select>
+    <button onclick="sonraki()">Sonraki &gt;</button>
 </div>
 
-<div class="viewer" id="comicContainer"></div>
+<div class="viewer" id="box"></div>
 
 <script>
     let ARSIV = {}; 
-    const sSelect = document.getElementById('seriesSelect');
-    const cSelect = document.getElementById('chapterSelect');
-    const viewer = document.getElementById('comicContainer');
+    const sSel = document.getElementById('sSelect');
+    const cSel = document.getElementById('cSelect');
+    const box = document.getElementById('box');
 
-    // 1. EXCEL DOSYASINI OKU
-    fetch('liste.csv?t=' + Date.now()).then(res => res.text()).then(text => {
-        sSelect.innerHTML = ""; 
-        text.split('\n').forEach(line => {
-            let d = line.split(',').map(x => x.trim());
+    // CSV OKUMA (Sıralama: Seri, Kullanıcı, Repo, Bölüm, Sayfa)
+    fetch('liste.csv?t=' + Date.now()).then(r => r.text()).then(t => {
+        sSel.innerHTML = ""; 
+        t.split('\n').forEach(l => {
+            let d = l.split(',').map(x => x.trim());
             if(d.length < 5) return;
-            // Excel sırası: İsim, Kullanıcı, Depo, Bölüm, Sayfa
-            let [seri, user, repo, bolum, sayfa] = d;
             
+            let [seri, user, repo, bolum, sayfa] = d;
+
             if(!ARSIV[seri]) ARSIV[seri] = { bolumler: {} };
             ARSIV[seri].bolumler[bolum] = { u: user, r: repo, s: parseInt(sayfa) };
         });
-
+        
         Object.keys(ARSIV).sort().forEach(s => {
-            let opt = document.createElement("option");
-            opt.text = s; opt.value = s;
-            sSelect.add(opt);
+            let o = document.createElement("option"); o.text = s; o.value = s; sSel.add(o);
         });
-        bolumleriGetir();
+        bolumGetir();
     });
 
-    // 2. MENÜLERİ AYARLA
-    function bolumleriGetir() {
-        cSelect.innerHTML = "";
-        let seri = sSelect.value;
-        if(!ARSIV[seri]) return;
-        Object.keys(ARSIV[seri].bolumler).sort((a,b)=>a-b).forEach(b => {
-            let opt = document.createElement("option");
-            opt.text = "Bölüm " + b; opt.value = b;
-            cSelect.add(opt);
+    function bolumGetir() {
+        cSel.innerHTML = "";
+        let s = sSel.value;
+        if(!ARSIV[s]) return;
+        Object.keys(ARSIV[s].bolumler).sort((a,b)=>a-b).forEach(b => {
+            let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; cSel.add(o);
         });
-        resimleriGetir();
+        resimGetir();
     }
 
-    // 3. RESİMLERİ ÇEK (GARSON SERVİS YAPIYOR)
-    function resimleriGetir() {
-        viewer.innerHTML = "<h3 style='text-align:center; padding:20px'>Yükleniyor...</h3>";
+    function resimGetir() {
+        box.innerHTML = "<div class='loading'>Yükleniyor...</div>";
         window.scrollTo(0,0);
-        let seri = sSelect.value;
-        let bolum = cSelect.value;
-        let veri = ARSIV[seri].bolumler[bolum];
+        let s = sSel.value; 
+        let b = cSel.value;
+        if(!ARSIV[s] || !ARSIV[s].bolumler[b]) return;
 
-        viewer.innerHTML = "";
-        for(let i=1; i<=veri.s; i++) {
+        let data = ARSIV[s].bolumler[b];
+        box.innerHTML = "";
+
+        for(let i=1; i<=data.s; i++) {
             let img = document.createElement("img");
-            // Adresi Excel'den gelen bilgiye göre oluştur
-            img.src = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${seri}/${bolum}/${i.toString().padStart(2,'0')}.jpg`;
+            let sayfa = i.toString().padStart(2,'0'); 
+            // DİKKAT: Burası senin toonarc hesabından çekecek
+            img.src = `https://cdn.jsdelivr.net/gh/${data.u}/${data.r}/${s}/${b}/${sayfa}.jpg`;
             img.loading = "lazy";
             img.onerror = function(){ this.style.display="none"; };
-            viewer.appendChild(img);
+            box.appendChild(img);
         }
     }
 
-    function sonrakiBolum() {
-        if(cSelect.selectedIndex < cSelect.options.length-1) {
-            cSelect.selectedIndex++;
-            resimleriGetir();
-        } else { alert("Bitti!"); }
+    function sonraki() { 
+        if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
+        else { alert("Bitti!"); } 
     }
 </script>
 </body>
