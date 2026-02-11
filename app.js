@@ -26,6 +26,21 @@ window.addEventListener('popstate', () => {
     }
 });
 
+// --- TARİH FORMATLAMA ---
+function formatTarih(tarihStr) {
+    if (!tarihStr) return "Yeni";
+    // Basit bir kontrol: Bugünün tarihiyle aynısıysa "Bugün" yaz
+    let bugun = new Date();
+    let tarihParca = tarihStr.split('.'); // 11.02.2026
+    if(tarihParca.length === 3) {
+        if (parseInt(tarihParca[0]) === bugun.getDate() && 
+            parseInt(tarihParca[1]) === (bugun.getMonth() + 1)) {
+            return "1 saat önce";
+        }
+    }
+    return tarihStr;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const listContainer = document.getElementById('manga-list');
@@ -34,43 +49,64 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rows.length > 0) rows.shift(); 
 
         rows.forEach((l) => {
+            // Sütunları ayır
+            // Dikkat: CSV'de virgül içinde virgül olmamalı
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5 || d[0] === "" || d[0].toLowerCase().includes("isim")) return;
 
-            let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
+            // YENİ CSV YAPISI (13. Sütun Tarih)
+            // 0:İsim, 1:Klasör, 2:User, 3:Repo, 4:Aralık, 5:Kapak, 6:Banner, 7:Tür, 8:Durum, 9:Yazar, 10:Özet, 11:Puan, 12:Tarih
+            let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet, puan, tarih] = d;
+            
             if (isNaN(parseInt(aralik))) return;
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner) banner = kapak; 
 
             ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
-                meta: { kapak, tur, durum, yazar, banner, ozet: ozet || "Açıklama bulunamadı." }
+                meta: { 
+                    kapak, tur, durum, yazar, banner, 
+                    ozet: ozet || "Açıklama bulunamadı.",
+                    tarih: tarih || "" // Tarihi kaydet
+                }
             };
             
             let range = aralik.includes('-') ? aralik.split('-') : [aralik, aralik];
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // --- YENİ LİSTE GÖRÜNÜMÜ OLUŞTURUCU ---
-            // Son 2 bölümü bul
-            let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 2);
+            // --- LİSTE GÖRÜNÜMÜ ---
+            // Son 4 bölümü al
+            let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
 
             sonBolumler.forEach((b, index) => {
-                // En son bölüme "YENİ" etiketi, eskilere normal
-                let badge = index === 0 ? `<span class="badge-new highlight">YENİ</span>` : `<span class="badge-new">OKU</span>`;
+                let badge = "";
+                let displayDate = "";
+
+                if(index === 0) {
+                    // En son bölüm (CSV'den gelen tarih)
+                    badge = `<span class="badge-new highlight">YENİ</span>`;
+                    displayDate = formatTarih(ARSIV[isim].meta.tarih);
+                } else {
+                    // Eski bölümler için sahte/eski tarih
+                    badge = `<span class="badge-new">OKU</span>`;
+                    displayDate = "Geçmiş"; 
+                }
                 
                 bolumListesiHTML += `
                 <div class="mini-chapter-item" onclick="event.stopPropagation(); openReader('${isim}', ${b})">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-fire" style="color:#ff0055; font-size:10px;"></i> 
+                    <div class="chapter-left">
+                        <i class="fas fa-file-alt" style="color:#555;"></i> 
                         Bölüm ${b}
                     </div>
-                    ${badge}
+                    <div class="chapter-right">
+                        ${badge}
+                        <span>${displayDate}</span>
+                    </div>
                 </div>`;
             });
 
-            // Kart HTML (Liste Tipinde)
             let itemHtml = `
             <div class="manga-list-item" onclick="openDetail('${isim}')">
                 <div class="list-poster-area">
@@ -100,6 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// --- SLIDER & DİĞERLERİ (AYNI) ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -124,22 +161,17 @@ function startSliderTimer(total) {
     sliderInterval = setInterval(() => changeSlide((currentIdx + 1) % total), 6000);
 }
 
-// --- SIRALAMA VE DETAY GÖSTERİMİ ---
 function toggleSort() {
     sortDesc = !sortDesc;
     const icon = document.getElementById('sort-icon');
-    if(sortDesc) {
-        icon.className = "fas fa-sort-numeric-down-alt"; 
-    } else {
-        icon.className = "fas fa-sort-numeric-down"; 
-    }
+    if(sortDesc) icon.className = "fas fa-sort-numeric-down-alt"; 
+    else icon.className = "fas fa-sort-numeric-down"; 
     if(currentSeri) renderChapterList(currentSeri);
 }
 
 function openDetail(isim, push = true) {
     currentSeri = isim;
     sortDesc = true; 
-    
     const icon = document.getElementById('sort-icon');
     if(icon) icon.className = "fas fa-sort-numeric-down-alt";
 
@@ -170,14 +202,13 @@ function renderChapterList(isim) {
     
     let data = ARSIV[isim];
     let sortedList = [...data.bolumler];
-    if(sortDesc) {
-        sortedList.reverse(); 
-    }
+    if(sortDesc) sortedList.reverse(); 
 
     const GORUNEN_LIMIT = 5;
 
     sortedList.forEach((b, index) => {
         let hiddenClass = index >= GORUNEN_LIMIT ? 'hidden-chapter' : '';
+        // Detay sayfasında tarih göstermeye gerek yok, sade olsun
         box.innerHTML += `
         <div class="chapter-item ${hiddenClass}" onclick="openReader('${isim}', ${b})">
             <div>
@@ -188,18 +219,13 @@ function renderChapterList(isim) {
         </div>`;
     });
 
-    if (sortedList.length > GORUNEN_LIMIT) {
-        expandBtn.style.display = "flex";
-    } else {
-        expandBtn.style.display = "none";
-    }
+    if (sortedList.length > GORUNEN_LIMIT) expandBtn.style.display = "flex";
+    else expandBtn.style.display = "none";
 }
 
 function expandChapters() {
     const hiddenItems = document.querySelectorAll('.hidden-chapter');
-    hiddenItems.forEach(item => {
-        item.classList.remove('hidden-chapter');
-    });
+    hiddenItems.forEach(item => item.classList.remove('hidden-chapter'));
     document.getElementById('expand-btn').style.display = "none";
 }
 
@@ -258,4 +284,5 @@ function loadCusdis(id, title, cont) {
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
     if (window.CUSDIS) window.CUSDIS.initial();
     else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
-        }
+}
+    
