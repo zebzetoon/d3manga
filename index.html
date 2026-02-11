@@ -53,9 +53,12 @@
         <div class="chapter-list-container">
             <div class="chapter-header">
                 <span id="chapter-count">Bölümler</span>
-                <i class="fas fa-sort-numeric-down"></i>
+                <i id="sort-icon" class="fas fa-sort-numeric-down-alt" onclick="toggleSort()" style="cursor: pointer;"></i>
             </div>
             <div id="chapter-list-box"></div>
+            <button id="expand-btn" class="expand-btn" style="display:none;" onclick="expandChapters()">
+                <i class="fas fa-chevron-down"></i> Genişlet
+            </button>
         </div>
 
         <div class="comments-section">
