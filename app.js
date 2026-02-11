@@ -4,7 +4,7 @@ const MAX_SAYFA = 100;
 let ARSIV = {}; 
 let currentSeri = null;
 let sliderInterval = null;
-let sortDesc = true; // Varsayılan: Yeni -> Eski (true)
+let sortDesc = true; 
 
 // ==========================================
 const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
@@ -28,8 +28,8 @@ window.addEventListener('popstate', () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
-        const grid = document.getElementById('manga-list');
-        grid.innerHTML = ""; 
+        const listContainer = document.getElementById('manga-list');
+        listContainer.innerHTML = ""; 
         let rows = t.split('\n');
         if (rows.length > 0) rows.shift(); 
 
@@ -51,7 +51,44 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            grid.innerHTML += `<div class="manga-card" onclick="openDetail('${isim}')"><div class="card-img-container"><div class="tag tag-status ${durum.includes('Tamam') ? 'tag-completed':'tag-ongoing'}">${durum}</div><img src="${kapak}" class="card-img"></div><div class="card-info"><div class="card-title">${isim}</div><div class="card-genre">${tur}</div></div></div>`;
+            // --- YENİ LİSTE GÖRÜNÜMÜ OLUŞTURUCU ---
+            // Son 2 bölümü bul
+            let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 2);
+            let bolumListesiHTML = "";
+
+            sonBolumler.forEach((b, index) => {
+                // En son bölüme "YENİ" etiketi, eskilere normal
+                let badge = index === 0 ? `<span class="badge-new highlight">YENİ</span>` : `<span class="badge-new">OKU</span>`;
+                
+                bolumListesiHTML += `
+                <div class="mini-chapter-item" onclick="event.stopPropagation(); openReader('${isim}', ${b})">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-fire" style="color:#ff0055; font-size:10px;"></i> 
+                        Bölüm ${b}
+                    </div>
+                    ${badge}
+                </div>`;
+            });
+
+            // Kart HTML (Liste Tipinde)
+            let itemHtml = `
+            <div class="manga-list-item" onclick="openDetail('${isim}')">
+                <div class="list-poster-area">
+                    <img src="${kapak}" class="list-poster" loading="lazy">
+                </div>
+                <div class="list-content-area">
+                    <div class="list-title">${isim}</div>
+                    <div class="list-rating">
+                        <i class="fas fa-star"></i> 9.8 
+                        <span style="color:#666; margin-left:5px;">• ${tur}</span>
+                    </div>
+                    <div class="mini-chapter-list">
+                        ${bolumListesiHTML}
+                    </div>
+                </div>
+            </div>`;
+            
+            listContainer.innerHTML += itemHtml;
         });
 
         let allKeys = Object.keys(ARSIV);
@@ -91,21 +128,18 @@ function startSliderTimer(total) {
 function toggleSort() {
     sortDesc = !sortDesc;
     const icon = document.getElementById('sort-icon');
-    // İkonu değiştir
     if(sortDesc) {
-        icon.className = "fas fa-sort-numeric-down-alt"; // 9 -> 1
+        icon.className = "fas fa-sort-numeric-down-alt"; 
     } else {
-        icon.className = "fas fa-sort-numeric-down"; // 1 -> 9
+        icon.className = "fas fa-sort-numeric-down"; 
     }
-    // Listeyi yenile
     if(currentSeri) renderChapterList(currentSeri);
 }
 
 function openDetail(isim, push = true) {
     currentSeri = isim;
-    sortDesc = true; // Her açılışta varsayılan (Yeni -> Eski)
+    sortDesc = true; 
     
-    // Sıralama ikonunu sıfırla
     const icon = document.getElementById('sort-icon');
     if(icon) icon.className = "fas fa-sort-numeric-down-alt";
 
@@ -120,7 +154,6 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
 
-    // Bölüm listesini çiz
     renderChapterList(isim);
 
     document.getElementById('home-view').style.display = 'none';
@@ -136,12 +169,9 @@ function renderChapterList(isim) {
     box.innerHTML = "";
     
     let data = ARSIV[isim];
-    // Kopyasını al ve sıralamaya göre diz
     let sortedList = [...data.bolumler];
     if(sortDesc) {
-        sortedList.reverse(); // Büyükten küçüğe
-    } else {
-        // Zaten küçükten büyüğe kayıtlı, dokunma
+        sortedList.reverse(); 
     }
 
     const GORUNEN_LIMIT = 5;
