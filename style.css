@@ -9,16 +9,19 @@ button { cursor: pointer; border: none; outline: none; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
 
-/* LİSTE GÖRÜNÜMÜ */
+/* LİSTE GÖRÜNÜMÜ (Kartlar) */
 .manga-list-container { display: flex; flex-direction: column; gap: 20px; }
-.manga-list-item { display: flex; gap: 15px; background: #111; padding: 12px; border-radius: 12px; border: 1px solid #222; align-items: flex-start; position: relative; overflow: hidden; }
+.manga-list-item { 
+    display: flex; gap: 15px; background: #111; padding: 12px; border-radius: 12px; 
+    border: 1px solid #222; align-items: flex-start; position: relative; overflow: hidden;
+}
 .list-poster-area { width: 100px; flex-shrink: 0; cursor: pointer; }
 .list-poster { width: 100%; border-radius: 8px; aspect-ratio: 2/3; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .list-content-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .list-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 15px; }
 
-/* --- BÖLÜM LİSTESİ --- */
+/* --- BÖLÜM LİSTESİ (HİZALAMA BURADA) --- */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
 
 .mini-chapter-item { 
@@ -29,15 +32,15 @@ button { cursor: pointer; border: none; outline: none; }
     color: #ccc; 
     display: flex; 
     justify-content: space-between; 
-    align-items: center; /* DİKEY HİZALAMA BURADA SAĞLANIYOR */
+    align-items: center; 
     cursor: pointer; 
     transition: 0.2s; 
     border: 1px solid #222; 
-    min-height: 36px; /* Hafif bir yükseklik standardı */
+    min-height: 38px; /* Satır yüksekliğini sabitledim */
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
-/* Sol Taraf */
+/* SOL TARAF (Bölüm Adı) */
 .chapter-left { 
     display: flex; 
     align-items: center; 
@@ -48,26 +51,33 @@ button { cursor: pointer; border: none; outline: none; }
     text-overflow: ellipsis; 
 }
 
-/* Sağ Taraf */
+/* SAĞ TARAF (Kutu ve Tarih) */
 .chapter-right { 
     display: flex; 
     align-items: center; 
-    gap: 10px; 
+    gap: 10px; /* Kutu ile tarih arasındaki boşluk */
     font-size: 11px; 
     color: #888; 
     flex-shrink: 0;
 }
 
-/* ROZET AYARLARI (ESKİ HALİNE DÖNDÜ) */
+/* --- ROZET AYARLARI (YENİ ve OKU) --- */
+/* İşte istediğin ayar burası: Sabit boyut, tam ortalama */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
     font-size: 9px; 
-    padding: 3px 7px; /* Sabit genişlik kalktı, padding geri geldi */
+    font-weight: 800; 
     border-radius: 4px; 
-    font-weight: bold; 
+    
+    /* PİKSELİ PİKSELİNE EŞİTLEME */
+    width: 38px;       /* Genişlik sabit (YENİ ve OKU aynı genişlikte olur) */
+    height: 20px;      /* Yükseklik sabit */
+    display: flex;     /* İçindeki yazıyı ortalamak için */
+    justify-content: center; /* Yatay ortala */
+    align-items: center;     /* Dikey ortala */
     letter-spacing: 0.5px;
-    /* width ve height SİLİNDİ, içerik kadar yer kaplar */
+    padding: 0;        /* Padding yok, boyut width/height ile belirlenir */
 }
 
 /* SLIDER */
@@ -132,4 +142,3 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item { color: #666; text-align: center; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
-    
