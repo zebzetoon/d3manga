@@ -15,7 +15,7 @@ function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// --- AKILLI TARİH HESAPLAYICI ---
+// --- AKILLI TARİH HESAPLAYICI (GÜNLÜK MOD) ---
 function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
     
@@ -23,17 +23,13 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     let parcalar = csvTarih.split('.');
     if(parcalar.length !== 3) return csvTarih;
 
-    // Tarihi oluştur
     let hedefTarih = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
-    
-    // Eski bölümler için tarihi geriye sar (Simülasyon)
     hedefTarih.setDate(hedefTarih.getDate() - gunGeriyeGit);
 
     let bugun = new Date();
     bugun.setHours(0,0,0,0);
     hedefTarih.setHours(0,0,0,0);
 
-    // Gün farkını bul
     let farkZaman = bugun - hedefTarih;
     let farkGun = Math.floor(farkZaman / (1000 * 60 * 60 * 24));
 
@@ -69,13 +65,12 @@ document.addEventListener("DOMContentLoaded", () => {
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5 || d[0] === "" || d[0].toLowerCase().includes("isim")) return;
 
-            // CSV Sütunları
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet, puan, tarih] = d;
             
             if (isNaN(parseInt(aralik))) return;
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner) banner = kapak; 
-            if(!puan) puan = "10"; // Puan yoksa 10 yap
+            if(!puan) puan = "10"; 
 
             ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
@@ -83,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     kapak, tur, durum, yazar, banner, 
                     ozet: ozet || "Açıklama bulunamadı.",
                     tarih: tarih || "",
-                    puan: puan // Puanı kaydet
+                    puan: puan 
                 }
             };
             
@@ -92,18 +87,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
             // --- LİSTE OLUŞTURUCU ---
-            // Son 4 bölümü al
             let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
 
             sonBolumler.forEach((b, index) => {
                 let badge = "";
                 
-                // --- TARİH SİMÜLASYONU ---
-                // index 0 (en yeni) -> tarih değişmez (0 gün çıkar)
-                // index 1 (bir önceki) -> 1 gün çıkar
-                // index 2 -> 3 gün çıkar (rastgelelik katmak için)
-                let gunFarki = index === 0 ? 0 : (index * 2); 
+                // Günlük Simülasyon: Her bölümü 1 gün eski göster
+                // 1. Bölüm: 0 gün (Yeni)
+                // 2. Bölüm: 1 gün (Dün)
+                // 3. Bölüm: 2 gün (2 gün önce)
+                let gunFarki = index; 
                 let gorunurTarih = hesaplaZaman(tarih, gunFarki);
 
                 if(index === 0) {
@@ -125,8 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>`;
             });
 
-            // Kart HTML
-            // NOT: Puan kısmı artık ${puan} değişkenini kullanıyor
             let itemHtml = `
             <div class="manga-list-item" onclick="openDetail('${isim}')">
                 <div class="list-poster-area">
@@ -147,18 +139,16 @@ document.addEventListener("DOMContentLoaded", () => {
             listContainer.innerHTML += itemHtml;
         });
 
-        // Slider Başlat
         let allKeys = Object.keys(ARSIV);
         if(allKeys.length > 0) initSlider(shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5));
 
-        // URL Kontrolü
         const urlParams = new URLSearchParams(window.location.search);
         const s = urlParams.get('seri'), b = urlParams.get('bolum');
         if (s && ARSIV[s]) b ? openReader(s, b, false) : openDetail(s, false);
     });
 });
 
-// --- STANDART FONKSİYONLAR ---
+// --- DİĞER FONKSİYONLAR ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -207,10 +197,6 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-genre').innerText = data.meta.tur;
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
-    
-    // Detay sayfasında da puanı gösterelim
-    // Not: Detay sayfasında Puan için özel bir yer ayırmadık ama istersen ekleyebiliriz.
-    // Şimdilik sadece liste görünümünde düzelttik.
 
     renderChapterList(isim);
 
@@ -306,4 +292,4 @@ function loadCusdis(id, title, cont) {
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
     if (window.CUSDIS) window.CUSDIS.initial();
     else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
-}
+                            }
