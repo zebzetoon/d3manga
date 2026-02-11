@@ -7,19 +7,18 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// CUSDIS ID'Nİ BURAYA YAZ
-const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
+// SENİN CUSDIS ID'Nİ BURAYA YERLEŞTİRDİM ✅
+const CUSDIS_APP_ID = "f4a6045a-79c6-451c-a912-2f95e68f305a"; 
 // ==========================================
 
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// --- AKILLI TARİH HESAPLAYICI ("1 Gün Önce" Modu) ---
+// --- AKILLI TARİH HESAPLAYICI ---
 function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
     
-    // Tarih formatı: GG.AA.YYYY (Örn: 11.02.2026)
     let parcalar = csvTarih.split('.');
     if(parcalar.length !== 3) return csvTarih;
 
@@ -34,7 +33,7 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     let farkGun = Math.floor(farkZaman / (1000 * 60 * 60 * 24));
 
     if (farkGun <= 0) return "1 saat önce";
-    if (farkGun === 1) return "1 gün önce"; // "Dün" yerine "1 gün önce"
+    if (farkGun === 1) return "1 gün önce";
     if (farkGun > 1 && farkGun < 7) return farkGun + " gün önce";
     if (farkGun >= 7 && farkGun < 30) return Math.floor(farkGun / 7) + " hafta önce";
     if (farkGun >= 30) return Math.floor(farkGun / 30) + " ay önce";
@@ -92,12 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             sonBolumler.forEach((b, index) => {
                 let badge = "";
-                
-                // GÜNLÜK ATMA MANTIĞI:
-                // Her bir alt bölümü 1 gün daha eski göster
-                // 1. Bölüm (0) -> 0 gün fark -> "1 saat önce"
-                // 2. Bölüm (1) -> 1 gün fark -> "1 gün önce"
-                // 3. Bölüm (2) -> 2 gün fark -> "2 gün önce"
                 let gunFarki = index; 
                 let gorunurTarih = hesaplaZaman(tarih, gunFarki);
 
@@ -290,7 +283,17 @@ function onceki() {
 
 function loadCusdis(id, title, cont) {
     const target = document.getElementById(cont); if (!target) return;
+    
+    // Yorum kutusunu oluştur
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
-    if (window.CUSDIS) window.CUSDIS.initial();
-    else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
-                   }
+    
+    // Scripti yükle veya yeniden başlat
+    if (window.CUSDIS) {
+        window.CUSDIS.initial();
+    } else {
+        let s = document.createElement("script");
+        s.src = "https://cusdis.com/js/cusdis.es.js";
+        s.async = true;
+        document.body.appendChild(s);
+    }
+}
