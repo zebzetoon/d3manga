@@ -7,6 +7,7 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
+// CUSDIS ID BURAYA
 const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
 // ==========================================
 
@@ -14,31 +15,35 @@ function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// --- AKILLI TARİH HESAPLAMA ---
-function hesaplaZaman(csvTarih) {
+// --- AKILLI TARİH HESAPLAYICI ---
+function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
     
-    // Tarih formatı: GG.AA.YYYY (Örn: 10.02.2026)
+    // Tarih formatı: GG.AA.YYYY (Örn: 11.02.2026)
     let parcalar = csvTarih.split('.');
     if(parcalar.length !== 3) return csvTarih;
 
-    let girilenTarih = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
-    let bugun = new Date();
+    // Tarihi oluştur
+    let hedefTarih = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
     
-    // Saat farkını sıfırla (Sadece gün bazlı bak)
-    girilenTarih.setHours(0,0,0,0);
-    bugun.setHours(0,0,0,0);
+    // Eski bölümler için tarihi geriye sar (Simülasyon)
+    hedefTarih.setDate(hedefTarih.getDate() - gunGeriyeGit);
 
-    let farkZaman = bugun - girilenTarih;
+    let bugun = new Date();
+    bugun.setHours(0,0,0,0);
+    hedefTarih.setHours(0,0,0,0);
+
+    // Gün farkını bul
+    let farkZaman = bugun - hedefTarih;
     let farkGun = Math.floor(farkZaman / (1000 * 60 * 60 * 24));
 
-    if (farkGun === 0) return "1 saat önce"; // Bugün
+    if (farkGun <= 0) return "1 saat önce";
     if (farkGun === 1) return "Dün";
     if (farkGun > 1 && farkGun < 7) return farkGun + " gün önce";
     if (farkGun >= 7 && farkGun < 30) return Math.floor(farkGun / 7) + " hafta önce";
     if (farkGun >= 30) return Math.floor(farkGun / 30) + " ay önce";
     
-    return csvTarih; // Çok eskiyse tarihi göster
+    return csvTarih;
 }
 
 window.addEventListener('popstate', () => {
@@ -64,18 +69,21 @@ document.addEventListener("DOMContentLoaded", () => {
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5 || d[0] === "" || d[0].toLowerCase().includes("isim")) return;
 
+            // CSV Sütunları
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet, puan, tarih] = d;
             
             if (isNaN(parseInt(aralik))) return;
             if(!kapak) kapak = "https://via.placeholder.com/200x300";
             if(!banner) banner = kapak; 
+            if(!puan) puan = "10"; // Puan yoksa 10 yap
 
             ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
                 meta: { 
                     kapak, tur, durum, yazar, banner, 
                     ozet: ozet || "Açıklama bulunamadı.",
-                    tarih: tarih || "" 
+                    tarih: tarih || "",
+                    puan: puan // Puanı kaydet
                 }
             };
             
@@ -83,26 +91,25 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // --- LİSTE OLUŞTUR ---
+            // --- LİSTE OLUŞTURUCU ---
+            // Son 4 bölümü al
             let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
-            let zamanMetni = hesaplaZaman(tarih); // Tarihi hesapla
 
             sonBolumler.forEach((b, index) => {
                 let badge = "";
-                let displayDate = "";
+                
+                // --- TARİH SİMÜLASYONU ---
+                // index 0 (en yeni) -> tarih değişmez (0 gün çıkar)
+                // index 1 (bir önceki) -> 1 gün çıkar
+                // index 2 -> 3 gün çıkar (rastgelelik katmak için)
+                let gunFarki = index === 0 ? 0 : (index * 2); 
+                let gorunurTarih = hesaplaZaman(tarih, gunFarki);
 
-                if(index === 0) { // En yeni bölüm
-                    badge = `<span class="badge-new">YENİ</span>`;
-                    displayDate = zamanMetni; 
-                } else if(index === 1) { // Bir önceki
-                    // Bir önceki bölüm için mantıklı bir geçmiş zaman uydur (veya boş bırak)
-                    badge = `<span class="badge-new" style="background:#444;">OKU</span>`;
-                    // Eğer ana tarih "Dün" ise, bir öncekine "2 gün önce" de
-                    displayDate = zamanMetni === "1 saat önce" ? "Dün" : ""; 
+                if(index === 0) {
+                    badge = `<span class="badge-new highlight">YENİ</span>`;
                 } else {
-                    badge = `<span class="badge-new" style="background:#444;">OKU</span>`;
-                    displayDate = "";
+                    badge = `<span class="badge-new" style="background:#333; color:#888; border:none;">OKU</span>`;
                 }
                 
                 bolumListesiHTML += `
@@ -113,11 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="chapter-right">
                         ${badge}
-                        <span>${displayDate}</span>
+                        <span>${gorunurTarih}</span>
                     </div>
                 </div>`;
             });
 
+            // Kart HTML
+            // NOT: Puan kısmı artık ${puan} değişkenini kullanıyor
             let itemHtml = `
             <div class="manga-list-item" onclick="openDetail('${isim}')">
                 <div class="list-poster-area">
@@ -126,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="list-content-area">
                     <div class="list-title">${isim}</div>
                     <div class="list-rating">
-                        <i class="fas fa-star"></i> 9.8 
+                        <i class="fas fa-star"></i> ${puan} 
                         <span style="color:#666; margin-left:5px;">• ${tur}</span>
                     </div>
                     <div class="mini-chapter-list">
@@ -138,16 +147,18 @@ document.addEventListener("DOMContentLoaded", () => {
             listContainer.innerHTML += itemHtml;
         });
 
+        // Slider Başlat
         let allKeys = Object.keys(ARSIV);
         if(allKeys.length > 0) initSlider(shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5));
 
+        // URL Kontrolü
         const urlParams = new URLSearchParams(window.location.search);
         const s = urlParams.get('seri'), b = urlParams.get('bolum');
         if (s && ARSIV[s]) b ? openReader(s, b, false) : openDetail(s, false);
     });
 });
 
-// --- DİĞERLERİ ---
+// --- STANDART FONKSİYONLAR ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -196,6 +207,10 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-genre').innerText = data.meta.tur;
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
+    
+    // Detay sayfasında da puanı gösterelim
+    // Not: Detay sayfasında Puan için özel bir yer ayırmadık ama istersen ekleyebiliriz.
+    // Şimdilik sadece liste görünümünde düzelttik.
 
     renderChapterList(isim);
 
