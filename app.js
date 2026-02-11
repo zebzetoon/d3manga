@@ -6,159 +6,125 @@ let currentSeri = null;
 let sliderInterval = null;
 
 // ==========================================
-// CUSDIS AYARLARI (BURAYI DOLDUR!)
-// ==========================================
+// CUSDIS APP ID'Nİ BURAYA YAZ
 const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
+// ==========================================
 
-// --- RASTGELE SIRALAMA YARDIMCISI ---
 function shuffleArray(array) {
-    return array.sort(() => Math.random() - 0.5);
+    let cur = array.length, ran;
+    while (cur != 0) {
+        ran = Math.floor(Math.random() * cur); cur--;
+        [array[cur], array[ran]] = [array[ran], array[cur]];
+    }
+    return array;
 }
 
-// --- 1. GERİ TUŞU DİNLEYİCİSİ ---
-window.addEventListener('popstate', (event) => {
+window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const urlSeri = urlParams.get('seri');
-    const urlBolum = urlParams.get('bolum');
-
-    if (urlSeri && ARSIV[urlSeri]) {
-        if (urlBolum) openReader(urlSeri, urlBolum, false); 
-        else openDetail(urlSeri, false);
+    const seri = urlParams.get('seri');
+    const bolum = urlParams.get('bolum');
+    if (seri && ARSIV[seri]) {
+        if (bolum) openReader(seri, bolum, false);
+        else openDetail(seri, false);
     } else {
         closeDetail(false);
     }
 });
 
-// --- 2. CSV OKUMA VE BAŞLANGIÇ ---
 document.addEventListener("DOMContentLoaded", () => {
-    fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
-        const grid = document.getElementById('manga-list');
-        grid.innerHTML = ""; 
-        
-        let rows = t.split('\n');
-        if (rows.length > 0) rows.shift(); 
-
-        rows.forEach((l) => {
-            let d = l.split(',').map(x => x.trim());
-            if(d.length < 5) return;
-            let kontrolIsim = d[0].toLowerCase().replace(/[^a-z0-9]/g, "");
-            if (kontrolIsim === "isim" || d[0] === "") return;
-
-            let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
-            if (isNaN(parseInt(aralik))) return;
-
-            if(!kapak) kapak = "https://via.placeholder.com/200x300";
-            if(!banner || banner === "") banner = kapak; 
-            if(!ozet) ozet = "Özet bilgisi girilmedi.";
-            if(!yazar) yazar = "Anonim";
-
-            if(!ARSIV[isim]) ARSIV[isim] = { 
-                bolumler: [], u: user, r: repo, k: klasor, 
-                meta: { kapak, tur, durum, yazar, banner, ozet }
-            };
+    fetch('liste.csv?t=' + CACHE_ID)
+        .then(r => r.text())
+        .then(t => {
+            const grid = document.getElementById('manga-list');
+            grid.innerHTML = ""; 
             
-            let baslangic, bitis;
-            if (aralik.includes('-')) {
-                let p = aralik.split('-');
-                baslangic = parseInt(p[0]); bitis = parseInt(p[1]);
-            } else {
-                baslangic = parseInt(aralik); bitis = parseInt(aralik);
+            let rows = t.split('\n');
+            if (rows.length > 0) rows.shift(); 
+
+            rows.forEach((l) => {
+                let d = l.split(',').map(x => x.trim());
+                if(d.length < 5 || d[0].toLowerCase().includes("isim") || d[0] === "") return;
+
+                let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet] = d;
+                if (isNaN(parseInt(aralik))) return;
+
+                if(!kapak) kapak = "https://via.placeholder.com/200x300";
+                if(!banner) banner = kapak; 
+                
+                ARSIV[isim] = { 
+                    bolumler: [], u: user, r: repo, k: klasor, 
+                    meta: { kapak, tur, durum, yazar, banner, ozet: ozet || "Açıklama yükleniyor..." }
+                };
+                
+                let range = aralik.includes('-') ? aralik.split('-') : [aralik, aralik];
+                for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
+                ARSIV[isim].bolumler.sort((a,b) => a - b); 
+
+                grid.innerHTML += `
+                <div class="manga-card" onclick="openDetail('${isim}')">
+                    <div class="card-img-container">
+                        <div class="tag tag-status ${durum.includes('Tamam') ? 'tag-completed':'tag-ongoing'}">${durum}</div>
+                        <img src="${kapak}" class="card-img" loading="lazy">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${isim}</div>
+                        <div class="card-genre">${tur}</div>
+                    </div>
+                </div>`;
+            });
+
+            // Slider: Rastgele 5 seri seç
+            let allKeys = Object.keys(ARSIV);
+            if(allKeys.length > 0) {
+                let randomItems = shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5);
+                initSlider(randomItems);
             }
-            for(let i=baslangic; i<=bitis; i++) ARSIV[isim].bolumler.push(i);
-            ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            let durumHtml = durum && durum.toLowerCase().includes("tamam") ? 
-                `<div class="tag tag-status tag-completed">Tamamlandı</div>` : 
-                `<div class="tag tag-status tag-ongoing">Devam Ediyor</div>`;
-
-            let cardHtml = `
-            <div class="manga-card" onclick="openDetail('${isim}')">
-                <div class="card-img-container">
-                    ${durumHtml}
-                    <div class="tag tag-new">Yeni</div>
-                    <img src="${kapak}" class="card-img" loading="lazy">
-                </div>
-                <div class="card-info">
-                    <div class="card-title">${isim}</div>
-                    <div class="card-genre">${tur || 'Seri'}</div>
-                </div>
-            </div>`;
-            grid.innerHTML += cardHtml;
+            const urlParams = new URLSearchParams(window.location.search);
+            const s = urlParams.get('seri'), b = urlParams.get('bolum');
+            if (s && ARSIV[s]) b ? openReader(s, b, false) : openDetail(s, false);
         });
-
-        // SLIDER BAŞLAT (Rastgele 5 Seri Seç)
-        let allSeriesArray = Object.keys(ARSIV).map(key => ({ isim: key, meta: ARSIV[key].meta }));
-        let random5 = shuffleArray(allSeriesArray).slice(0, 5);
-        initSlider(random5);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlSeri = urlParams.get('seri');
-        const urlBolum = urlParams.get('bolum');
-        if (urlSeri && ARSIV[urlSeri]) {
-            if (urlBolum) openReader(urlSeri, urlBolum, false);
-            else openDetail(urlSeri, false);
-        }
-    });
 });
 
-// --- SLIDER FONKSİYONLARI ---
 function initSlider(items) {
-    const wrapper = document.getElementById('hero-wrapper');
-    const dotsContainer = document.getElementById('slider-dots');
-    if(!wrapper || items.length === 0) return;
-    wrapper.innerHTML = ""; dotsContainer.innerHTML = "";
-    items.forEach((item, index) => {
-        let activeClass = index === 0 ? 'active' : '';
+    const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
+    wrapper.innerHTML = ""; dots.innerHTML = "";
+    items.forEach((item, i) => {
         wrapper.innerHTML += `
-        <div class="hero-slide ${activeClass}">
+        <div class="hero-slide ${i===0?'active':''}">
             <img src="${item.meta.banner}" class="slide-bg">
             <div class="slide-content">
-                <img src="${item.meta.kapak}" class="slide-poster">
                 <div class="slide-info">
-                    <div class="slide-badge"><i class="fas fa-crown"></i> GÜNÜN SERİSİ</div>
+                    <div class="slide-badge"><i class="fas fa-fire"></i> TREND #${i+1}</div>
                     <div class="slide-title">${item.isim}</div>
                     <div class="slide-desc">${item.meta.ozet}</div>
-                    <button class="slide-btn" onclick="openDetail('${item.isim}')">
-                        <i class="fas fa-play"></i> Okumaya Başla
-                    </button>
+                    <button class="slide-btn" onclick="openDetail('${item.isim}')"><i class="fas fa-play"></i> Okumaya Başla</button>
                 </div>
+                <img src="${item.meta.kapak}" class="slide-poster">
             </div>
         </div>`;
-        dotsContainer.innerHTML += `<div class="dot ${activeClass}" onclick="changeSlide(${index})"></div>`;
+        dots.innerHTML += `<div class="dot ${i===0?'active':''}" onclick="changeSlide(${i})"></div>`;
     });
     startSliderTimer(items.length);
 }
 
-let currentSlideIndex = 0;
-function changeSlide(index) {
-    const slides = document.querySelectorAll('.hero-slide');
-    const dots = document.querySelectorAll('.dot');
-    if(slides.length === 0) return;
-    slides[currentSlideIndex].classList.remove('active');
-    dots[currentSlideIndex].classList.remove('active');
-    currentSlideIndex = index;
-    slides[currentSlideIndex].classList.add('active');
-    dots[currentSlideIndex].classList.add('active');
-    clearInterval(sliderInterval);
-    startSliderTimer(slides.length);
+let currentIdx = 0;
+function changeSlide(idx) {
+    const s = document.querySelectorAll('.hero-slide'), d = document.querySelectorAll('.dot');
+    if(!s[idx]) return;
+    s[currentIdx].classList.remove('active'); d[currentIdx].classList.remove('active');
+    currentIdx = idx;
+    s[currentIdx].classList.add('active'); d[currentIdx].classList.add('active');
 }
 
 function startSliderTimer(total) {
-    sliderInterval = setInterval(() => {
-        let nextIndex = (currentSlideIndex + 1) % total;
-        changeSlide(nextIndex);
-    }, 5000); 
+    clearInterval(sliderInterval);
+    sliderInterval = setInterval(() => changeSlide((currentIdx + 1) % total), 6000);
 }
 
-// --- DİĞER FONKSİYONLAR ---
-function openDetail(isim, historyEkle = true) {
-    currentSeri = isim;
-    let data = ARSIV[isim];
-    if(!data) return;
-    if (historyEkle) {
-        const newUrl = `?seri=${encodeURIComponent(isim)}`;
-        window.history.pushState({path: newUrl}, '', newUrl);
-    }
+function openDetail(isim, push = true) {
+    currentSeri = isim; let data = ARSIV[isim];
+    if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}`);
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -166,101 +132,60 @@ function openDetail(isim, historyEkle = true) {
     document.getElementById('detail-genre').innerText = data.meta.tur;
     document.getElementById('detail-summary').innerText = data.meta.ozet;
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
-    const listContainer = document.getElementById('chapter-list-box');
-    listContainer.innerHTML = "";
+    const box = document.getElementById('chapter-list-box');
+    box.innerHTML = "";
     [...data.bolumler].reverse().forEach(b => {
-        let item = document.createElement("div");
-        item.className = "chapter-item";
-        item.innerHTML = `<div><div class="chapter-name">Bölüm ${b}</div><div class="chapter-date">Yayında</div></div><i class="fas fa-chevron-right" style="color:#555;"></i>`;
-        item.onclick = () => openReader(isim, b);
-        listContainer.appendChild(item);
+        box.innerHTML += `<div class="chapter-item" onclick="openReader('${isim}', ${b})">
+            <div><div class="chapter-name">Bölüm ${b}</div><div class="chapter-date">Yayında</div></div>
+            <i class="fas fa-chevron-right"></i></div>`;
     });
     document.getElementById('home-view').style.display = 'none';
-    document.getElementById('reader-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
+    document.getElementById('reader-view').style.display = 'none';
     loadCusdis("seri_" + isim, isim, "cusdis_series");
-    if(historyEkle) window.scrollTo(0,0);
+    window.scrollTo(0,0);
 }
 
-function closeDetail(historyEkle = true) {
-    if (historyEkle) window.history.pushState({}, '', window.location.pathname);
+function closeDetail(push = true) {
+    if (push) window.history.pushState({}, '', window.location.pathname);
     document.getElementById('detail-view').style.display = 'none';
-    document.getElementById('reader-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
 }
 
-function openReader(isim, bolumNo = null, historyEkle = true) {
-    if(bolumNo === null) bolumNo = ARSIV[isim].bolumler[0];
-    if (historyEkle) {
-        const newUrl = `?seri=${encodeURIComponent(isim)}&bolum=${bolumNo}`;
-        window.history.pushState({path: newUrl}, '', newUrl);
-    }
-    currentSeri = isim; 
-    document.getElementById('home-view').style.display = 'none';
+function openReader(isim, no, push = true) {
+    if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}&bolum=${no}`);
+    currentSeri = isim;
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'block';
-    const cSel = document.getElementById('cSelect');
-    cSel.innerHTML = "";
-    ARSIV[isim].bolumler.forEach(b => {
-        let o = document.createElement("option"); o.text = "Bölüm " + b; o.value = b; 
-        if(b == bolumNo) o.selected = true;
-        cSel.add(o);
-    });
-    resimGetir(false); 
-    loadCusdis("bolum_" + isim + "_" + bolumNo, isim + " Bölüm " + bolumNo, "cusdis_chapter");
-    if(historyEkle) document.getElementById('reader-view').scrollTop = 0;
+    const sel = document.getElementById('cSelect'); sel.innerHTML = "";
+    ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
+    sel.value = no;
+    resimGetir();
+    loadCusdis("bolum_"+isim+"_"+no, isim+" Bölüm "+no, "cusdis_chapter");
 }
 
 function closeReader() { openDetail(currentSeri, true); }
 
-function resimGetir(historyEkle = true) {
-    const box = document.getElementById('box');
-    const b = document.getElementById('cSelect').value;
-    let veri = ARSIV[currentSeri];
-    if (historyEkle) {
-        const newUrl = `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`;
-        window.history.pushState({path: newUrl}, '', newUrl);
-        loadCusdis("bolum_" + currentSeri + "_" + b, currentSeri + " Bölüm " + b, "cusdis_chapter");
-    }
-    box.innerHTML = "<div style='text-align:center; padding:50px; color:#888;'>Yükleniyor...</div>";
-    let klasorYolu = veri.k === "." ? "" : veri.k + "/";
-    box.innerHTML = "";
+function resimGetir() {
+    const box = document.getElementById('box'), b = document.getElementById('cSelect').value, v = ARSIV[currentSeri];
+    box.innerHTML = ""; document.getElementById('reader-view').scrollTop = 0;
     for(let i=1; i<=MAX_SAYFA; i++) {
         let img = document.createElement("img");
-        let rawBase = `https://cdn.jsdelivr.net/gh/${veri.u}/${veri.r}/${klasorYolu}${b}/`;
-        img.dataset.sayi = i;
-        img.dataset.rawbase = rawBase;
-        img.src = createUrl(rawBase, i, ".jpg");
-        img.loading = "lazy";
-        img.onerror = function() {
-            let sayi = this.dataset.sayi;
-            let raw = this.dataset.rawbase;
-            if(!this.src.includes(sayi.toString().padStart(2,'0') + ".jpg")) {
-                this.src = createUrl(raw, sayi.toString().padStart(2,'0'), ".jpg");
-            } else { this.remove(); }
-        };
+        let path = `https://cdn.jsdelivr.net/gh/${v.u}/${v.r}/${v.k==='.'?'':v.k+'/'}${b}/${i}.jpg`;
+        img.src = IS_MOBILE ? `https://wsrv.nl/?url=${encodeURIComponent(path)}&w=800&output=jpg` : path;
+        img.onerror = function() { this.remove(); };
         box.appendChild(img);
     }
 }
 
-function createUrl(baseUrl, number, ext) {
-    let fullPath = baseUrl + number + ext + "?v=" + CACHE_ID;
-    if (IS_MOBILE) return `https://wsrv.nl/?url=${encodeURIComponent(fullPath)}&w=800&output=jpg`;
-    else return fullPath;
-}
-
 function sonraki() { 
-    const cSel = document.getElementById('cSelect');
-    if(cSel.selectedIndex < cSel.options.length-1) { cSel.selectedIndex++; resimGetir(); } 
-    else { alert("Bitti!"); } 
+    const s = document.getElementById('cSelect');
+    if(s.selectedIndex < s.options.length-1) { s.selectedIndex++; resimGetir(); } 
 }
 
-function loadCusdis(pageId, pageTitle, containerId) {
-    document.getElementById("cusdis_series").innerHTML = "";
-    document.getElementById("cusdis_chapter").innerHTML = "";
-    let target = document.getElementById(containerId);
-    if (!target) return;
-    target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${pageId}" data-page-url="${window.location.href}" data-page-title="${pageTitle}" data-theme="dark" data-lang="tr"></div>`; 
-    if (window.CUSDIS) { window.CUSDIS.initial(); } 
-    else { let script = document.createElement("script"); script.src = "https://cusdis.com/js/cusdis.es.js"; script.async = true; document.body.appendChild(script); }
-        }
+function loadCusdis(id, title, cont) {
+    const target = document.getElementById(cont); if (!target) return;
+    target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
+    if (window.CUSDIS) window.CUSDIS.initial();
+    else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
+}
