@@ -14,6 +14,33 @@ function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
+// --- AKILLI TARİH HESAPLAMA ---
+function hesaplaZaman(csvTarih) {
+    if(!csvTarih) return "";
+    
+    // Tarih formatı: GG.AA.YYYY (Örn: 10.02.2026)
+    let parcalar = csvTarih.split('.');
+    if(parcalar.length !== 3) return csvTarih;
+
+    let girilenTarih = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
+    let bugun = new Date();
+    
+    // Saat farkını sıfırla (Sadece gün bazlı bak)
+    girilenTarih.setHours(0,0,0,0);
+    bugun.setHours(0,0,0,0);
+
+    let farkZaman = bugun - girilenTarih;
+    let farkGun = Math.floor(farkZaman / (1000 * 60 * 60 * 24));
+
+    if (farkGun === 0) return "1 saat önce"; // Bugün
+    if (farkGun === 1) return "Dün";
+    if (farkGun > 1 && farkGun < 7) return farkGun + " gün önce";
+    if (farkGun >= 7 && farkGun < 30) return Math.floor(farkGun / 7) + " hafta önce";
+    if (farkGun >= 30) return Math.floor(farkGun / 30) + " ay önce";
+    
+    return csvTarih; // Çok eskiyse tarihi göster
+}
+
 window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const seri = urlParams.get('seri');
@@ -26,21 +53,6 @@ window.addEventListener('popstate', () => {
     }
 });
 
-// --- TARİH FORMATLAMA ---
-function formatTarih(tarihStr) {
-    if (!tarihStr) return "Yeni";
-    // Basit bir kontrol: Bugünün tarihiyle aynısıysa "Bugün" yaz
-    let bugun = new Date();
-    let tarihParca = tarihStr.split('.'); // 11.02.2026
-    if(tarihParca.length === 3) {
-        if (parseInt(tarihParca[0]) === bugun.getDate() && 
-            parseInt(tarihParca[1]) === (bugun.getMonth() + 1)) {
-            return "1 saat önce";
-        }
-    }
-    return tarihStr;
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const listContainer = document.getElementById('manga-list');
@@ -49,13 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rows.length > 0) rows.shift(); 
 
         rows.forEach((l) => {
-            // Sütunları ayır
-            // Dikkat: CSV'de virgül içinde virgül olmamalı
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5 || d[0] === "" || d[0].toLowerCase().includes("isim")) return;
 
-            // YENİ CSV YAPISI (13. Sütun Tarih)
-            // 0:İsim, 1:Klasör, 2:User, 3:Repo, 4:Aralık, 5:Kapak, 6:Banner, 7:Tür, 8:Durum, 9:Yazar, 10:Özet, 11:Puan, 12:Tarih
             let [isim, klasor, user, repo, aralik, kapak, banner, tur, durum, yazar, ozet, puan, tarih] = d;
             
             if (isNaN(parseInt(aralik))) return;
@@ -67,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 meta: { 
                     kapak, tur, durum, yazar, banner, 
                     ozet: ozet || "Açıklama bulunamadı.",
-                    tarih: tarih || "" // Tarihi kaydet
+                    tarih: tarih || "" 
                 }
             };
             
@@ -75,23 +83,26 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // --- LİSTE GÖRÜNÜMÜ ---
-            // Son 4 bölümü al
+            // --- LİSTE OLUŞTUR ---
             let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
+            let zamanMetni = hesaplaZaman(tarih); // Tarihi hesapla
 
             sonBolumler.forEach((b, index) => {
                 let badge = "";
                 let displayDate = "";
 
-                if(index === 0) {
-                    // En son bölüm (CSV'den gelen tarih)
-                    badge = `<span class="badge-new highlight">YENİ</span>`;
-                    displayDate = formatTarih(ARSIV[isim].meta.tarih);
+                if(index === 0) { // En yeni bölüm
+                    badge = `<span class="badge-new">YENİ</span>`;
+                    displayDate = zamanMetni; 
+                } else if(index === 1) { // Bir önceki
+                    // Bir önceki bölüm için mantıklı bir geçmiş zaman uydur (veya boş bırak)
+                    badge = `<span class="badge-new" style="background:#444;">OKU</span>`;
+                    // Eğer ana tarih "Dün" ise, bir öncekine "2 gün önce" de
+                    displayDate = zamanMetni === "1 saat önce" ? "Dün" : ""; 
                 } else {
-                    // Eski bölümler için sahte/eski tarih
-                    badge = `<span class="badge-new">OKU</span>`;
-                    displayDate = "Geçmiş"; 
+                    badge = `<span class="badge-new" style="background:#444;">OKU</span>`;
+                    displayDate = "";
                 }
                 
                 bolumListesiHTML += `
@@ -136,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// --- SLIDER & DİĞERLERİ (AYNI) ---
+// --- DİĞERLERİ ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -208,14 +219,10 @@ function renderChapterList(isim) {
 
     sortedList.forEach((b, index) => {
         let hiddenClass = index >= GORUNEN_LIMIT ? 'hidden-chapter' : '';
-        // Detay sayfasında tarih göstermeye gerek yok, sade olsun
         box.innerHTML += `
         <div class="chapter-item ${hiddenClass}" onclick="openReader('${isim}', ${b})">
-            <div>
-                <div class="chapter-name">Bölüm ${b}</div>
-                <div class="chapter-date">Yayında</div>
-            </div>
-            <i class="fas fa-chevron-right"></i>
+            <div class="chapter-name">Bölüm ${b}</div>
+            <i class="fas fa-chevron-right" style="color:#555;"></i>
         </div>`;
     });
 
@@ -285,4 +292,3 @@ function loadCusdis(id, title, cont) {
     if (window.CUSDIS) window.CUSDIS.initial();
     else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
 }
-    
