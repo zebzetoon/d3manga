@@ -1,7 +1,9 @@
+/* --- GENEL AYARLAR --- */
 body { background-color: #000; color: #fff; margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; padding-bottom: 80px; overflow-x: hidden; }
 a { text-decoration: none; color: white; }
 button { cursor: pointer; border: none; outline: none; }
 
+/* --- ANA SAYFA --- */
 .app-container { padding: 15px; display: block; min-height: 100vh; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
@@ -15,14 +17,50 @@ button { cursor: pointer; border: none; outline: none; }
 .list-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 15px; }
 
+/* --- BÖLÜM LİSTESİ (HİZALAMA DÜZELTİLDİ) --- */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 8px; }
-.mini-chapter-item { background: #1a1a1a; padding: 8px 10px; border-radius: 6px; font-size: 12px; color: #ccc; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
-.mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
-.chapter-left { display: flex; align-items: center; gap: 8px; }
-.chapter-right { display: flex; align-items: center; gap: 8px; font-size: 10px; color: #777; }
-.badge-new { background: #ff0055; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
-/* SLIDER */
+.mini-chapter-item { 
+    background: #1a1a1a; 
+    padding: 10px 12px; /* İç boşluk artırıldı */
+    border-radius: 8px; 
+    font-size: 12px; 
+    color: #ccc; 
+    display: flex; 
+    justify-content: space-between; /* İki uca yasla */
+    align-items: center; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    border: 1px solid #222;
+    gap: 10px; /* İki taraf birbirine değmesin */
+}
+.mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
+
+/* Sol Taraf: İsim (Esnek) */
+.chapter-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    flex: 1; /* Boş alanı kapla */
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
+/* Sağ Taraf: Etiket ve Tarih (Sabit) */
+.chapter-right { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; /* Tarih ve Badge arası boşluk */
+    font-size: 11px; 
+    color: #888; 
+    flex-shrink: 0; /* Asla küçülme/alta geçme */
+}
+
+/* YENİ Rozeti */
+.badge-new { background: #ff0055; color: #fff; font-size: 9px; padding: 3px 7px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; }
+
+/* --- SLIDER --- */
 .hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 30px; }
 @media (min-width: 1024px) { .hero-slider-container { height: 450px; } }
 .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
@@ -40,8 +78,8 @@ button { cursor: pointer; border: none; outline: none; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; transition: 0.3s; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
 
-/* DETAY VE OKUYUCU */
-#detail-view, #reader-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d0d; z-index: 1500; overflow-y: auto; }
+/* --- DETAY SAYFASI --- */
+#detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d0d; z-index: 1500; overflow-y: auto; }
 .detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; filter: blur(10px); opacity: 0.4; z-index: -1; }
 .detail-content { padding: 20px; padding-top: 100px; max-width: 900px; margin: 0 auto; position: relative; }
 .detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; }
