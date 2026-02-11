@@ -9,56 +9,25 @@ button { cursor: pointer; border: none; outline: none; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
 
-/* LİSTE KARTI (Dış Çerçeve) */
+/* LİSTE KARTI */
 .manga-list-container { display: flex; flex-direction: column; gap: 20px; }
-
 .manga-list-item { 
-    display: flex; 
-    gap: 15px; 
-    background: #111; 
-    padding: 10px; /* İç boşluğu azalttım */
-    border-radius: 12px; 
-    border: 1px solid #222; 
-    align-items: center; /* Dikeyde her şeyi ortala */
-    position: relative; 
-    overflow: hidden; 
+    display: flex; gap: 15px; background: #111; padding: 12px; border-radius: 12px; 
+    border: 1px solid #222; align-items: flex-start; position: relative; overflow: hidden;
 }
+.list-poster-area { width: 100px; flex-shrink: 0; cursor: pointer; }
+.list-poster { width: 100%; border-radius: 8px; aspect-ratio: 2/3; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.list-content-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.list-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 15px; }
 
-/* SOL: KAPAK RESMİ (Biraz Büyüttüm) */
-.list-poster-area { 
-    width: 115px; /* 100px'den 115px'e çıktı, denge için */
-    flex-shrink: 0; 
-    cursor: pointer; 
-}
-.list-poster { 
-    width: 100%; 
-    border-radius: 8px; 
-    aspect-ratio: 2/3; 
-    object-fit: cover; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-    display: block; /* Altındaki boşluğu siler */
-}
-
-/* SAĞ: İÇERİK ALANI (Sıkılaştırdım) */
-.list-content-area { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; /* İçeriği dikey ortala */
-    min-width: 0; 
-    gap: 4px; /* Başlık ve liste arası boşluk azaldı */
-}
-
-.list-title { font-size: 16px; font-weight: bold; margin: 0; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 6px; }
-
-/* BÖLÜM KUTULARI (Daha İnce) */
-.mini-chapter-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+/* --- BÖLÜM LİSTESİ --- */
+.mini-chapter-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
 
 .mini-chapter-item { 
     background: #1a1a1a; 
-    padding: 0 10px; /* Üst-alt boşluk 0, yükseklik min-height ile */
-    border-radius: 6px; 
+    padding: 8px 12px; 
+    border-radius: 8px; 
     font-size: 12px; 
     color: #ccc; 
     display: flex; 
@@ -67,25 +36,48 @@ button { cursor: pointer; border: none; outline: none; }
     cursor: pointer; 
     transition: 0.2s; 
     border: 1px solid #222; 
-    min-height: 34px; /* Kutular inceldi, resimle eşitlensin diye */
+    min-height: 38px;
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
-/* Sol Taraf (İsim) */
-.chapter-left { display: flex; align-items: center; gap: 8px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* SOL TARAF (İsim) */
+.chapter-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    flex: 1; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
 
-/* Sağ Taraf (Kutu ve Tarih) */
-.chapter-right { display: flex; align-items: center; gap: 10px; font-size: 10px; color: #888; flex-shrink: 0; }
+/* SAĞ TARAF (Kutu ve Tarih) */
+.chapter-right { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-size: 11px; 
+    color: #888; 
+    flex-shrink: 0;
+}
 
-/* ROZETLER (Sabit Boyut) */
+/* !!! İŞTE HİZALAMAYI DÜZELTEN SİHİRLİ KOD !!! */
+/* Tarih yazısına sabit yer ayırıyoruz ki kutuyu itmesin */
+.chapter-right span {
+    min-width: 70px;      /* Sabit genişlik (Tarih ne kadar uzun olursa olsun yer değişmez) */
+    text-align: right;    /* Yazıyı sağa yasla */
+    display: inline-block;
+}
+
+/* ROZET AYARLARI */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
     font-size: 9px; 
     font-weight: 800; 
     border-radius: 4px; 
-    width: 38px;       
-    height: 18px;      /* Biraz daha kibar */
+    width: 38px;       /* Sabit genişlik */
+    height: 18px;      /* Sabit yükseklik */
     display: flex;     
     justify-content: center; 
     align-items: center;     
