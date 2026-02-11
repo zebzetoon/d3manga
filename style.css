@@ -6,10 +6,7 @@ button { cursor: pointer; border: none; outline: none; }
 /* --- ANA SAYFA --- */
 .app-container { padding: 15px; display: block; min-height: 100vh; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
-
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; display: flex; justify-content: space-between; align-items: center; }
-.section-title span { color: #888; font-size: 12px; }
-
 .manga-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 @media (min-width: 768px) { .manga-grid { grid-template-columns: repeat(5, 1fr); gap: 25px; } }
 
@@ -17,13 +14,10 @@ button { cursor: pointer; border: none; outline: none; }
 .manga-card:hover { transform: translateY(-5px); }
 .card-img-container { width: 100%; aspect-ratio: 2/3; position: relative; border-radius: 12px; overflow: hidden; background: #1a1a1a; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
-
 .tag { position: absolute; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 10; color: #fff; }
 .tag-new { top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); }
-.tag-status { top: 8px; left: 8px; }
 .tag-completed { background: #d32f2f; }
 .tag-ongoing { background: #388e3c; }
-
 .card-info { padding: 10px 2px; }
 .card-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-genre { font-size: 11px; color: #888; margin-top: 3px; }
@@ -31,7 +25,6 @@ button { cursor: pointer; border: none; outline: none; }
 /* --- SLIDER --- */
 .hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 20px; }
 @media (min-width: 1024px) { .hero-slider-container { height: 450px; } }
-
 .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
 .hero-slide.active { opacity: 1; z-index: 2; }
 .slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(15px) brightness(0.4); z-index: -1; transform: scale(1.1); }
@@ -42,9 +35,7 @@ button { cursor: pointer; border: none; outline: none; }
 @media (min-width: 1024px) { .slide-title { font-size: 45px; } }
 .slide-desc { font-size: 12px; color: #ddd; margin-bottom: 20px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .slide-btn { background: #ff0055; color: white; padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 13px; box-shadow: 0 5px 15px rgba(255, 0, 85, 0.4); display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-.slide-btn:active { transform: scale(0.95); }
 .slide-poster { width: 110px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-@media (min-width: 1024px) { .slide-poster { width: 220px; } }
 .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 20; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; transition: 0.3s; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
@@ -58,38 +49,32 @@ button { cursor: pointer; border: none; outline: none; }
 .detail-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
 .detail-meta { display: flex; gap: 10px; font-size: 12px; color: #ccc; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
 .meta-badge { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+.btn-read { flex: 1; background: #ff0055; color: white; padding: 14px; border-radius: 30px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .action-buttons { display: flex; gap: 15px; width: 100%; max-width: 400px; margin-bottom: 30px; }
-.btn-read { flex: 1; background: #ff0055; color: white; padding: 14px; border-radius: 30px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 5px 20px rgba(255, 0, 85, 0.3); }
 .btn-icon { width: 50px; background: #222; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 .summary-box { background: #181818; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #2a2a2a; }
 .summary-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #ff0055; }
 .summary-text { font-size: 14px; line-height: 1.6; color: #ddd; }
+
+/* BÖLÜM LİSTESİ */
 .chapter-list-container { background: #181818; border-radius: 15px; padding: 10px; margin-bottom: 30px; border: 1px solid #2a2a2a; }
-.chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; }
+.chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
 .chapter-item:active { background: #222; }
+.hidden-chapter { display: none !important; }
+.expand-btn { width: 100%; padding: 12px; background: #222; color: #aaa; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
 
 /* --- OKUYUCU SAYFASI --- */
 #reader-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2500; overflow-y: auto; }
 .reader-header { position: sticky; top: 0; background: rgba(10,10,10,0.95); padding: 10px; display: flex; gap: 10px; justify-content: center; z-index: 2601; backdrop-filter: blur(10px); border-bottom: 1px solid #333; }
 .nav-btn { background: #222; color: white; width: 45px; height: 40px; border-radius: 8px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-.nav-btn:active { background: #ff0055; }
 #cSelect { background: #1a1a1a; color: white; border: 1px solid #333; padding: 5px; border-radius: 8px; flex: 1; max-width: 200px; }
 .reader-content img { width: 100%; max-width: 800px; margin: 0 auto; display: block; }
-
-/* YÜKLEME İKONU (SPINNER) */
 .loader-container { padding: 50px; display: flex; justify-content: center; align-items: center; }
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 0, 85, 0.2); border-left-color: #ff0055; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* YORUMLAR */
 .comments-section { margin-top: 30px; padding: 20px; background: #181818; border-radius: 15px; border: 1px solid #2a2a2a; }
-.comments-section h3 { margin-bottom: 15px; text-align: center; }
-
-/* ALT MENÜ */
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #000; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
-.nav-item { color: #555; text-align: center; font-size: 10px; }
-.nav-item i { font-size: 22px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
                  
