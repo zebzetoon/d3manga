@@ -10,18 +10,13 @@
 <body>
 
 <div id="home-view" class="app-container">
-    
     <div class="hero-slider-container">
-        <div id="hero-wrapper" class="hero-wrapper">
-            <div style="text-align:center; padding-top:100px; color:#555;">Yükleniyor...</div>
-        </div>
+        <div id="hero-wrapper" class="hero-wrapper"></div>
         <div id="slider-dots" class="slider-dots"></div>
     </div>
 
     <div class="section-title">Son Eklenenler <span>Hepsini görüntüle ></span></div>
-    <div class="manga-grid" id="manga-list">
-        <div style="text-align:center; grid-column: span 2; color:#555; padding:50px;">Seriler Hazırlanıyor...</div>
-    </div>
+    <div class="manga-grid" id="manga-list"></div>
 </div>
 
 <div id="detail-view" style="display: none;">
@@ -39,7 +34,7 @@
             </div>
             
             <div class="action-buttons">
-                <button class="btn-read" onclick="openReader(currentSeri)">
+                <button class="btn-read" onclick="startReading()">
                     <i class="fas fa-book-open"></i> Okumaya Başla
                 </button>
                 <button class="btn-icon"><i class="far fa-bookmark"></i></button>
@@ -48,7 +43,7 @@
 
         <div class="summary-box">
             <div class="summary-title"><i class="fas fa-align-left"></i> Hikaye Özeti</div>
-            <div id="detail-summary" class="summary-text">Açıklama yükleniyor...</div>
+            <div id="detail-summary" class="summary-text"></div>
         </div>
 
         <div class="chapter-list-container">
@@ -68,10 +63,15 @@
 
 <div id="reader-view" style="display: none;">
     <div class="reader-header">
-        <button class="close-btn" onclick="closeReader()"><i class="fas fa-arrow-left"></i> Geri</button>
+        <button onclick="onceki()" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
         <select id="cSelect" onchange="resimGetir()"></select>
-        <button onclick="sonraki()" class="next-btn">İleri ></button>
+        <button onclick="sonraki()" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
     </div>
+    
+    <div id="reader-loader" class="loader-container" style="display:none;">
+        <div class="spinner"></div>
+    </div>
+
     <div id="box" class="reader-content"></div>
 
     <div class="comments-section" style="max-width: 800px; margin: 30px auto;">
