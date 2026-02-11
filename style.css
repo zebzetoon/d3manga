@@ -23,58 +23,57 @@ button { cursor: pointer; border: none; outline: none; }
 
 .mini-chapter-item { 
     background: #1a1a1a; 
-    padding: 10px 12px; 
+    padding: 8px 12px; 
     border-radius: 8px; 
     font-size: 12px; 
     color: #ccc; 
     display: flex; 
     justify-content: space-between; 
-    align-items: center; /* Dikeyde TAM ORTALA */
+    align-items: center; 
     cursor: pointer; 
     transition: 0.2s; 
     border: 1px solid #222; 
-    gap: 10px; 
-    min-height: 40px; /* Standart yükseklik */
+    min-height: 40px; /* Yükseklik standardı */
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
-/* Sol Taraf (İsim) */
+/* Sol Taraf: İsim */
 .chapter-left { 
     display: flex; 
     align-items: center; 
-    gap: 8px; 
+    gap: 10px; 
     flex: 1; 
     white-space: nowrap; 
     overflow: hidden; 
-    text-overflow: ellipsis;
-    line-height: 1; /* Satır yüksekliğini sıfırla */
+    text-overflow: ellipsis; 
 }
 
-/* Sağ Taraf (Rozet ve Tarih) */
+/* Sağ Taraf: Buton ve Tarih */
 .chapter-right { 
     display: flex; 
     align-items: center; 
-    gap: 8px; 
+    gap: 12px; /* Buton ve tarih arası boşluk */
     font-size: 11px; 
     color: #888; 
     flex-shrink: 0;
-    line-height: 1; /* Satır yüksekliğini sıfırla */
 }
 
-/* Rozet Ayarları (YENİ / OKU) */
+/* ROZET AYARI (YENİ - OKU) */
+/* Burası ikisini de eşit boya getirir */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
-    font-size: 9px; 
-    padding: 4px 8px; /* İç boşluğu artırdım */
+    font-size: 10px; 
+    font-weight: 800; 
     border-radius: 4px; 
-    font-weight: bold; 
-    letter-spacing: 0.5px;
-    display: inline-flex; /* İçeriği ortalamak için */
+    
+    /* ÖNEMLİ: HİZALAMA KODLARI */
+    width: 45px;       /* Sabit Genişlik */
+    height: 22px;      /* Sabit Yükseklik */
+    display: flex;     /* İçini ortalamak için */
     align-items: center; 
     justify-content: center;
-    height: 20px; /* Sabit yükseklik vererek hizayı garantiledim */
-    min-width: 35px; /* Genişlikler eşit olsun */
+    letter-spacing: 0.5px;
 }
 
 /* SLIDER */
