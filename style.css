@@ -18,7 +18,7 @@ button { cursor: pointer; border: none; outline: none; }
 .list-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; line-height: 1.3; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 15px; }
 
-/* --- BÖLÜM LİSTESİ (HİZALAMA DÜZELTİLDİ) --- */
+/* --- BÖLÜM LİSTESİ --- */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
 
 .mini-chapter-item { 
@@ -29,51 +29,45 @@ button { cursor: pointer; border: none; outline: none; }
     color: #ccc; 
     display: flex; 
     justify-content: space-between; 
-    align-items: center; 
+    align-items: center; /* DİKEY HİZALAMA BURADA SAĞLANIYOR */
     cursor: pointer; 
     transition: 0.2s; 
     border: 1px solid #222; 
-    min-height: 40px; /* Yükseklik standardı */
+    min-height: 36px; /* Hafif bir yükseklik standardı */
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
-/* Sol Taraf: İsim */
+/* Sol Taraf */
 .chapter-left { 
     display: flex; 
     align-items: center; 
-    gap: 10px; 
+    gap: 8px; 
     flex: 1; 
     white-space: nowrap; 
     overflow: hidden; 
     text-overflow: ellipsis; 
 }
 
-/* Sağ Taraf: Buton ve Tarih */
+/* Sağ Taraf */
 .chapter-right { 
     display: flex; 
     align-items: center; 
-    gap: 12px; /* Buton ve tarih arası boşluk */
+    gap: 10px; 
     font-size: 11px; 
     color: #888; 
     flex-shrink: 0;
 }
 
-/* ROZET AYARI (YENİ - OKU) */
-/* Burası ikisini de eşit boya getirir */
+/* ROZET AYARLARI (ESKİ HALİNE DÖNDÜ) */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
-    font-size: 10px; 
-    font-weight: 800; 
+    font-size: 9px; 
+    padding: 3px 7px; /* Sabit genişlik kalktı, padding geri geldi */
     border-radius: 4px; 
-    
-    /* ÖNEMLİ: HİZALAMA KODLARI */
-    width: 45px;       /* Sabit Genişlik */
-    height: 22px;      /* Sabit Yükseklik */
-    display: flex;     /* İçini ortalamak için */
-    align-items: center; 
-    justify-content: center;
+    font-weight: bold; 
     letter-spacing: 0.5px;
+    /* width ve height SİLİNDİ, içerik kadar yer kaplar */
 }
 
 /* SLIDER */
@@ -138,3 +132,4 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item { color: #666; text-align: center; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
+    
