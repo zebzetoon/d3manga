@@ -7,7 +7,7 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// CUSDIS ID BURAYA
+// CUSDIS ID'Nİ BURAYA YAZ
 const CUSDIS_APP_ID = "BURAYA-UZUN-KODU-YAPISTIR"; 
 // ==========================================
 
@@ -15,7 +15,7 @@ function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// --- AKILLI TARİH HESAPLAYICI (GÜNLÜK MOD) ---
+// --- AKILLI TARİH HESAPLAYICI ("1 Gün Önce" Modu) ---
 function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
     
@@ -34,7 +34,7 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     let farkGun = Math.floor(farkZaman / (1000 * 60 * 60 * 24));
 
     if (farkGun <= 0) return "1 saat önce";
-    if (farkGun === 1) return "Dün";
+    if (farkGun === 1) return "1 gün önce"; // "Dün" yerine "1 gün önce"
     if (farkGun > 1 && farkGun < 7) return farkGun + " gün önce";
     if (farkGun >= 7 && farkGun < 30) return Math.floor(farkGun / 7) + " hafta önce";
     if (farkGun >= 30) return Math.floor(farkGun / 30) + " ay önce";
@@ -93,10 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
             sonBolumler.forEach((b, index) => {
                 let badge = "";
                 
-                // Günlük Simülasyon: Her bölümü 1 gün eski göster
-                // 1. Bölüm: 0 gün (Yeni)
-                // 2. Bölüm: 1 gün (Dün)
-                // 3. Bölüm: 2 gün (2 gün önce)
+                // GÜNLÜK ATMA MANTIĞI:
+                // Her bir alt bölümü 1 gün daha eski göster
+                // 1. Bölüm (0) -> 0 gün fark -> "1 saat önce"
+                // 2. Bölüm (1) -> 1 gün fark -> "1 gün önce"
+                // 3. Bölüm (2) -> 2 gün fark -> "2 gün önce"
                 let gunFarki = index; 
                 let gorunurTarih = hesaplaZaman(tarih, gunFarki);
 
@@ -292,4 +293,4 @@ function loadCusdis(id, title, cont) {
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
     if (window.CUSDIS) window.CUSDIS.initial();
     else { let s = document.createElement("script"); s.src = "https://cusdis.com/js/cusdis.es.js"; s.async = true; document.body.appendChild(s); }
-                            }
+                   }
