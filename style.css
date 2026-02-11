@@ -40,7 +40,8 @@ button { cursor: pointer; border: none; outline: none; }
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
-/* SOL TARAF (İsim) */
+/* SOL TARAF (Bölüm Adı) */
+/* Burası ekranın kalanını doldurur */
 .chapter-left { 
     display: flex; 
     align-items: center; 
@@ -52,37 +53,44 @@ button { cursor: pointer; border: none; outline: none; }
 }
 
 /* SAĞ TARAF (Kutu ve Tarih) */
+/* Burası artık SABİT genişlikte, kımıldayamaz */
 .chapter-right { 
     display: flex; 
     align-items: center; 
-    gap: 10px; 
+    gap: 10px; /* Kutu ile tarih arasındaki boşluk */
     font-size: 11px; 
     color: #888; 
     flex-shrink: 0;
 }
 
-/* !!! İŞTE HİZALAMAYI DÜZELTEN SİHİRLİ KOD !!! */
-/* Tarih yazısına sabit yer ayırıyoruz ki kutuyu itmesin */
+/* TARİH YAZISI (SABİT GENİŞLİK) */
+/* Tarih yazısı ne kadar uzun olursa olsun hep 75px yer kaplar. */
+/* Böylece solundaki kutuyu itmez. */
 .chapter-right span {
-    min-width: 70px;      /* Sabit genişlik (Tarih ne kadar uzun olursa olsun yer değişmez) */
-    text-align: right;    /* Yazıyı sağa yasla */
+    width: 75px;          /* Sabit genişlik (min-width değil, width) */
+    text-align: right;    /* Sağa yasla */
     display: inline-block;
+    white-space: nowrap;  /* Alt satıra geçmesin */
 }
 
-/* ROZET AYARLARI */
+/* ROZET AYARLARI (YENİ / OKU) */
+/* Kutu boyutları tamamen sabitlendi */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
     font-size: 9px; 
     font-weight: 800; 
     border-radius: 4px; 
-    width: 38px;       /* Sabit genişlik */
-    height: 18px;      /* Sabit yükseklik */
+    
+    width: 35px;       /* Kutu genişliği sabit */
+    height: 18px;      /* Kutu yüksekliği sabit */
+    
     display: flex;     
     justify-content: center; 
     align-items: center;     
     letter-spacing: 0.5px;
     padding: 0;        
+    flex-shrink: 0;    /* Asla sıkışmasın */
 }
 
 /* SLIDER */
