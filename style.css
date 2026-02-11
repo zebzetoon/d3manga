@@ -4,7 +4,7 @@ a { text-decoration: none; color: white; }
 button { cursor: pointer; border: none; outline: none; }
 .loading-text { text-align: center; color: #555; padding: 50px; }
 
-/* --- ANA SAYFA (Sabit) --- */
+/* --- ANA SAYFA --- */
 .app-container { padding: 15px; display: block; min-height: 100vh; position: relative; z-index: 1; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
@@ -51,11 +51,10 @@ button { cursor: pointer; border: none; outline: none; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; transition: 0.3s; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
 
-/* --- DETAY SAYFASI (ÜST KATMAN) --- */
+/* --- DETAY SAYFASI --- */
 #detail-view { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: #0d0d0d; z-index: 2000; /* Ana sayfadan yukarıda */
-    overflow-y: auto; display: none; /* Başlangıçta gizli */
+    background: #0d0d0d; z-index: 2000; overflow-y: auto; display: none;
 }
 .detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; filter: blur(10px); opacity: 0.4; z-index: -1; }
 .detail-content { padding: 20px; padding-top: 100px; max-width: 900px; margin: 0 auto; position: relative; }
@@ -70,8 +69,6 @@ button { cursor: pointer; border: none; outline: none; }
 .summary-box { background: #181818; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #2a2a2a; }
 .summary-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #ff0055; }
 .summary-text { font-size: 14px; line-height: 1.6; color: #ddd; }
-
-/* BÖLÜM LİSTESİ (DETAY) */
 .chapter-list-container { background: #181818; border-radius: 15px; padding: 10px; margin-bottom: 30px; border: 1px solid #2a2a2a; }
 .chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
@@ -81,11 +78,10 @@ button { cursor: pointer; border: none; outline: none; }
 .expand-btn { width: 100%; padding: 12px; background: #222; color: #aaa; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(5px); }
 
-/* --- OKUYUCU SAYFASI (EN ÜST KATMAN) --- */
+/* --- OKUYUCU SAYFASI --- */
 #reader-view { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: #000; z-index: 3000; 
-    overflow-y: auto; display: none;
+    background: #000; z-index: 3000; overflow-y: auto; display: none;
 }
 .reader-header { position: sticky; top: 0; background: rgba(10,10,10,0.95); padding: 10px; display: flex; gap: 10px; justify-content: center; z-index: 3100; backdrop-filter: blur(10px); border-bottom: 1px solid #333; }
 .nav-btn { background: #222; color: white; width: 45px; height: 40px; border-radius: 8px; font-size: 16px; display: flex; align-items: center; justify-content: center; }
@@ -94,11 +90,28 @@ button { cursor: pointer; border: none; outline: none; }
 .loader-container { padding: 50px; display: flex; justify-content: center; align-items: center; }
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 0, 85, 0.2); border-left-color: #ff0055; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.comments-section { margin-top: 30px; padding: 20px; background: #181818; border-radius: 15px; border: 1px solid #2a2a2a; }
+
+/* --- YORUMLAR (CUSDIS) - GÜNCELLENDİ --- */
+.comments-section { 
+    margin-top: 40px; 
+    padding: 20px; 
+    background: #111; /* Biraz daha koyu ve düz */
+    border-radius: 12px; 
+    border: 1px solid #222;
+    min-height: 200px; /* Çökmesini engelle */
+}
+.comments-section h3 { margin-bottom: 20px; color: #fff; text-align: center; }
+
+/* Cusdis iframe'inin tam genişlikte ve düzgün görünmesi için */
+#cusdis_thread iframe {
+    width: 100% !important;
+    border: none;
+    display: block;
+}
 
 /* ALT MENÜ */
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 1000; height: 60px; }
 .nav-item { color: #666; text-align: center; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
-          
+              
