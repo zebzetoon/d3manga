@@ -7,7 +7,7 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// SENİN CUSDIS ID'Nİ BURAYA YERLEŞTİRDİM ✅
+// CUSDIS ID (SENİNKİ)
 const CUSDIS_APP_ID = "f4a6045a-79c6-451c-a912-2f95e68f305a"; 
 // ==========================================
 
@@ -15,7 +15,6 @@ function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
-// --- AKILLI TARİH HESAPLAYICI ---
 function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
     
@@ -85,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // --- LİSTE OLUŞTURUCU ---
             let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
 
@@ -142,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// --- DİĞER FONKSİYONLAR ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -283,17 +280,17 @@ function onceki() {
 
 function loadCusdis(id, title, cont) {
     const target = document.getElementById(cont); if (!target) return;
-    
-    // Yorum kutusunu oluştur
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
     
-    // Scripti yükle veya yeniden başlat
-    if (window.CUSDIS) {
-        window.CUSDIS.initial();
-    } else {
-        let s = document.createElement("script");
-        s.src = "https://cusdis.com/js/cusdis.es.js";
-        s.async = true;
-        document.body.appendChild(s);
-    }
+    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
+    setTimeout(() => {
+        if (window.CUSDIS) {
+            window.CUSDIS.initial();
+        } else {
+            let s = document.createElement("script");
+            s.src = "https://cusdis.com/js/cusdis.es.js";
+            s.async = true;
+            document.body.appendChild(s);
+        }
+    }, 500); // 500ms bekleyip yükle
 }
