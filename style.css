@@ -1,68 +1,19 @@
 /* --- GENEL AYARLAR --- */
-body { 
-    background-color: #000; 
-    color: #fff; 
-    margin: 0; 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    padding-bottom: 80px; /* Alt menü için boşluk */
-    overflow-x: hidden; 
-}
+body { background-color: #000; color: #fff; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding-bottom: 80px; overflow-x: hidden; }
 a { text-decoration: none; color: white; }
 button { cursor: pointer; }
 
 /* --- ANA SAYFA --- */
-.app-container { 
-    padding: 15px; 
-    display: block; /* Ana sayfa görünür olsun */
-    min-height: 100vh; 
-}
-
-.banner { 
-    width: 100%; 
-    height: 180px; 
-    background: #111; 
-    border-radius: 15px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    margin-bottom: 20px; 
-    background-image: linear-gradient(45deg, #d32f2f, #000); 
-}
-
-.section-title { 
-    font-size: 18px; 
-    font-weight: bold; 
-    margin: 20px 0 10px 0; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-}
+.app-container { padding: 15px; display: block; min-height: 100vh; }
+.section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; display: flex; justify-content: space-between; align-items: center; }
 .section-title span { color: #888; font-size: 12px; }
 
-/* Manga Izgarası */
-.manga-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); /* Telefondan 2'li görünüm */
-    gap: 15px; 
-    padding-bottom: 20px; 
-}
-@media (min-width: 768px) { 
-    .manga-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } 
-    .app-container { max-width: 1200px; margin: 0 auto; } 
-}
+.manga-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 20px; }
+@media (min-width: 768px) { .manga-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } .app-container { max-width: 1200px; margin: 0 auto; } }
 
-/* Kart Tasarımı */
 .manga-card { border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s; }
 .manga-card:hover { transform: translateY(-5px); }
-
-.card-img-container { 
-    width: 100%; 
-    aspect-ratio: 2/3; 
-    position: relative; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    background: #222; 
-}
+.card-img-container { width: 100%; aspect-ratio: 2/3; position: relative; border-radius: 12px; overflow: hidden; background: #222; }
 .card-img { width: 100%; height: 100%; object-fit: cover; }
 
 .tag { position: absolute; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; color: white; z-index: 10; }
@@ -75,69 +26,50 @@ button { cursor: pointer; }
 .card-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-genre { font-size: 11px; color: #aaa; margin-top: 2px; }
 
-/* --- DETAY SAYFASI (ÖNEMLİ KISIM) --- */
-#detail-view { 
-    display: none; /* BAŞLANGIÇTA GİZLİ OLMALI */
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: #121212; 
-    z-index: 1500; 
-    overflow-y: auto; 
-}
+/* --- EVA SCANS TARZI SLIDER --- */
+.hero-slider-container { position: relative; width: 100%; height: 260px; border-radius: 12px; overflow: hidden; margin-bottom: 25px; background: #000; box-shadow: 0 5px 25px rgba(0,0,0,0.7); }
+@media (min-width: 768px) { .hero-slider-container { height: 380px; } }
+.hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
+.hero-slide.active { opacity: 1; z-index: 2; }
+.slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(12px) brightness(0.4); z-index: -1; transform: scale(1.1); }
+.slide-content { position: relative; z-index: 10; display: flex; align-items: center; gap: 20px; width: 100%; }
+.slide-poster { width: 100px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.9); flex-shrink: 0; }
+@media (min-width: 768px) { .slide-poster { width: 170px; } }
+.slide-info { color: white; flex: 1; overflow: hidden; }
+.slide-badge { background: #ff0055; color: white; padding: 4px 10px; border-radius: 50px; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 10px; }
+.slide-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (min-width: 768px) { .slide-title { font-size: 34px; } }
+.slide-desc { font-size: 12px; color: #ccc; margin-bottom: 15px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.slide-btn { background: #ff0055; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 700; font-size: 13px; border: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4); cursor: pointer; }
+.slider-dots { position: absolute; bottom: 15px; right: 25px; display: flex; gap: 8px; z-index: 20; }
+.dot { width: 7px; height: 7px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; transition: 0.3s; }
+.dot.active { background: #ff0055; transform: scale(1.4); }
 
-.detail-banner { 
-    width: 100%; height: 350px; 
-    position: absolute; top: 0; left: 0; 
-    background-size: cover; background-position: center; 
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0));
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0));
-    opacity: 0.5; filter: blur(8px); z-index: -1;
-}
-
+/* --- DETAY SAYFASI --- */
+#detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; z-index: 1500; overflow-y: auto; }
+.detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0)); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0)); opacity: 0.5; filter: blur(8px); z-index: -1; }
 .detail-content { padding: 20px; padding-top: 100px; max-width: 800px; margin: 0 auto; position: relative; }
-
 .detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; }
 .detail-cover { width: 150px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 20px; }
 .detail-title { font-size: 26px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-
 .detail-meta { display: flex; gap: 10px; font-size: 12px; color: #ccc; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
 .meta-badge { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
-
 .action-buttons { display: flex; gap: 15px; width: 100%; max-width: 400px; margin-bottom: 30px; }
 .btn-read { flex: 1; background: #d32f2f; color: white; border: none; padding: 14px; border-radius: 30px; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); }
 .btn-icon { width: 50px; background: #333; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-
-/* Özet Alanı */
 .summary-box { background: #1e1e1e; padding: 20px; border-radius: 15px; margin-bottom: 25px; }
 .summary-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #d32f2f; display: flex; align-items: center; gap: 8px; }
 .summary-text { font-size: 14px; line-height: 1.6; color: #ddd; }
-
-/* Bölüm Listesi */
 .chapter-list-container { background: #1e1e1e; border-radius: 15px; padding: 10px; margin-bottom: 30px; }
 .chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
 .chapter-item:active { background: #333; }
-.chapter-item:last-child { border-bottom: none; }
 .chapter-name { font-weight: 500; font-size: 15px; }
 .chapter-date { font-size: 11px; color: #666; margin-top: 4px; }
-
 .back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; }
 
 /* --- OKUYUCU MODU --- */
-#reader-view { 
-    display: none; /* BAŞLANGIÇTA GİZLİ OLMALI */
-    background: #000; 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    z-index: 2500; 
-    overflow-y: auto; 
-}
+#reader-view { background: #000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2500; overflow-y: auto; }
 .reader-header { position: sticky; top: 0; background: rgba(20,20,20,0.95); padding: 10px; display: flex; gap: 10px; justify-content: center; border-bottom: 1px solid #333; z-index: 2601; }
 .close-btn { background: #333; color: white; border: none; padding: 5px 15px; border-radius: 4px; }
 .reader-content img { width: 100%; display: block; image-rendering: high-quality; transform: translateZ(0); }
