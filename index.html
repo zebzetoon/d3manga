@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZebzeManga</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZebzeManga</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -13,13 +13,14 @@
     
     <div class="hero-slider-container">
         <div id="hero-wrapper" class="hero-wrapper">
-            </div>
+            <div style="text-align:center; padding-top:100px; color:#555;">Yükleniyor...</div>
+        </div>
         <div id="slider-dots" class="slider-dots"></div>
     </div>
 
     <div class="section-title">Son Eklenenler <span>Hepsini görüntüle ></span></div>
     <div class="manga-grid" id="manga-list">
-        <div style="text-align:center; grid-column: span 2; color:#555;">Yükleniyor...</div>
+        <div style="text-align:center; grid-column: span 2; color:#555; padding:50px;">Seriler Hazırlanıyor...</div>
     </div>
 </div>
 
@@ -58,8 +59,8 @@
             <div id="chapter-list-box"></div>
         </div>
 
-        <div class="comments-section" style="margin-top: 30px; padding: 20px; background: #1e1e1e; border-radius: 15px;">
-            <h3 style="margin-bottom: 15px; color: #fff;">Yorumlar</h3>
+        <div class="comments-section">
+            <h3>Yorumlar</h3>
             <div id="cusdis_series"></div> 
         </div>
     </div>
@@ -69,12 +70,12 @@
     <div class="reader-header">
         <button class="close-btn" onclick="closeReader()"><i class="fas fa-arrow-left"></i> Geri</button>
         <select id="cSelect" onchange="resimGetir()"></select>
-        <button onclick="sonraki()" style="background:#333; color:white; border:none; padding:5px 10px; border-radius:4px;">İleri ></button>
+        <button onclick="sonraki()" class="next-btn">İleri ></button>
     </div>
     <div id="box" class="reader-content"></div>
 
-    <div class="comments-section" style="max-width: 800px; margin: 30px auto; padding: 20px; background: #111; color: #fff;">
-        <h3 style="text-align: center; margin-bottom: 15px;">Bölüm Yorumları</h3>
+    <div class="comments-section" style="max-width: 800px; margin: 30px auto;">
+        <h3 style="text-align: center;">Bölüm Yorumları</h3>
         <div id="cusdis_chapter"></div>
     </div>
 </div>
