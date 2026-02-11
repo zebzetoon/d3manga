@@ -17,7 +17,6 @@ function shuffleArray(array) {
 
 function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     if(!csvTarih) return "";
-    
     let parcalar = csvTarih.split('.');
     if(parcalar.length !== 3) return csvTarih;
 
@@ -39,6 +38,17 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     
     return csvTarih;
 }
+
+// --- YENİ EKLENEN KISIM: Iframe Boyutlandırma Dinleyicisi ---
+// Cusdis'ten gelen mesajı dinler ve iframe boyunu ayarlar
+window.addEventListener('message', function (e) {
+    if (e.data && e.data.from === 'cusdis') {
+        const frame = document.querySelector('#cusdis_thread iframe');
+        if (frame) {
+            frame.style.height = e.data.data + 'px';
+        }
+    }
+});
 
 window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -282,7 +292,7 @@ function loadCusdis(id, title, cont) {
     const target = document.getElementById(cont); if (!target) return;
     target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
     
-    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
+    // GECİKMELİ YÜKLEME 
     setTimeout(() => {
         if (window.CUSDIS) {
             window.CUSDIS.initial();
@@ -292,5 +302,5 @@ function loadCusdis(id, title, cont) {
             s.async = true;
             document.body.appendChild(s);
         }
-    }, 500); // 500ms bekleyip yükle
+    }, 500); 
 }
