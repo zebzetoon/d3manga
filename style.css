@@ -24,7 +24,7 @@ button { cursor: pointer; border: none; outline: none; }
     overflow: hidden; 
 }
 
-/* SOL: KAPAK RESMİ (Sabit) */
+/* SOL: KAPAK RESMİ */
 .list-poster-area { 
     width: 95px;   
     height: 140px; 
@@ -97,12 +97,15 @@ button { cursor: pointer; border: none; outline: none; }
     line-height: 34px; 
 }
 
-/* ROZET AYARLARI (YENİ / OKU) */
+/* --- ROZET AYARLARI (GÜNCELLENDİ) --- */
 .badge-new { 
     background: #ff0055; 
-    color: #fff; 
+    
+    /* YAZIYI BEMBEYAZ YAPMAK İÇİN: */
+    color: #ffffff !important; 
+    font-weight: 900 !important; /* Daha kalın (Bold) */
+    
     font-size: 9px; 
-    font-weight: 800; 
     border-radius: 4px; 
     
     width: 36px !important;      
@@ -119,19 +122,18 @@ button { cursor: pointer; border: none; outline: none; }
     flex-shrink: 0; 
 }
 
-/* 🔥 SADECE "YENİ" KUTUSU İÇİN PARLAMA EFEKTİ 🔥 */
-/* (Not: 'OKU' butonlarında inline style olduğu için bu efekt onlara uygulanmaz) */
+/* 🔥 "YENİ" KUTUSU İÇİN ÖZEL PARLAMA (Yazı Hariç) 🔥 */
 .badge-new:not([style]) {
-    /* Daha canlı pembe arka plan */
+    /* Canlı pembe arka plan */
     background: linear-gradient(135deg, #ff0055 0%, #ff3377 100%);
     
-    /* Kutunun etrafına neon ışık yay */
-    box-shadow: 0 0 8px rgba(255, 0, 85, 0.6); 
+    /* Kutunun dışına neon ışık yay */
+    box-shadow: 0 0 8px rgba(255, 0, 85, 0.7); 
     
-    /* Yazının kendisine beyaz parlama ver */
-    text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+    /* Yazı üzerindeki bulanıklaştıran gölgeyi KALDIRDIM */
+    text-shadow: none !important; 
     
-    /* Hafifçe yukarı çıksın (isteğe bağlı, daha dikkat çeker) */
+    /* Hafif yukarı çıksın */
     transform: translateY(-0.5px);
 }
 
