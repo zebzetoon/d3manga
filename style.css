@@ -9,7 +9,7 @@ button { cursor: pointer; border: none; outline: none; }
 @media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
 
-/* LİSTE KARTI (Dış Çerçeve) */
+/* LİSTE KARTI */
 .manga-list-container { display: flex; flex-direction: column; gap: 15px; }
 
 .manga-list-item { 
@@ -19,20 +19,15 @@ button { cursor: pointer; border: none; outline: none; }
     padding: 10px; 
     border-radius: 10px; 
     border: 1px solid #222; 
-    
-    /* ÖNEMLİ DEĞİŞİKLİK: 'stretch' yerine 'flex-start' yaptık. 
-       Böylece içerik uzasa bile resim uzamaz. */
     align-items: flex-start; 
-    
     position: relative; 
     overflow: hidden; 
 }
 
-/* SOL: KAPAK RESMİ (SABİT BOYUT) */
-/* Artık resim boyutu içerikten etkilenmez, hep standart kalır */
+/* SOL: KAPAK RESMİ (Beton Gibi Sabit) */
 .list-poster-area { 
-    width: 100px;  /* Sabit Genişlik */
-    height: 150px; /* Sabit Yükseklik (Standart Poster Boyu) */
+    width: 95px;   /* Sabit Genişlik */
+    height: 140px; /* Sabit Yükseklik */
     flex-shrink: 0; 
     cursor: pointer; 
 }
@@ -40,7 +35,7 @@ button { cursor: pointer; border: none; outline: none; }
     width: 100%; 
     height: 100%;
     border-radius: 6px; 
-    object-fit: cover; /* Resmi kutuya sığdırır ama bozmaz */
+    object-fit: cover; /* Resmi kutuya sığdırır, uzatmaz/basıklaştırmaz */
     box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
     display: block;
 }
@@ -50,11 +45,10 @@ button { cursor: pointer; border: none; outline: none; }
     flex: 1; 
     display: flex; 
     flex-direction: column; 
-    /* Yükseklik resimle (150px) aynı olsun, az bölüm varsa ortalasın */
-    min-height: 150px; 
-    justify-content: center; 
+    justify-content: center; /* İçeriği dikey ortala */
+    min-height: 140px; /* Resimle aynı minimum yükseklik */
     min-width: 0; 
-    gap: 5px; 
+    gap: 4px; 
 }
 
 /* Başlık ve Puan */
@@ -66,19 +60,10 @@ button { cursor: pointer; border: none; outline: none; }
     cursor: pointer; 
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
 }
-.list-rating { 
-    font-size: 11px; 
-    color: #ffcc00; 
-    margin-bottom: 5px; 
-}
+.list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 6px; }
 
 /* BÖLÜM LİSTESİ */
-.mini-chapter-list { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 6px; 
-    width: 100%; 
-}
+.mini-chapter-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 
 /* TEKİL BÖLÜM SATIRI */
 .mini-chapter-item { 
@@ -93,18 +78,12 @@ button { cursor: pointer; border: none; outline: none; }
     cursor: pointer; 
     transition: 0.2s; 
     border: 1px solid #222; 
-    height: 36px; /* Satır yüksekliği */
+    height: 34px; /* Satır yüksekliği */
 }
 .mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 
 /* Sol Taraf (Bölüm Adı) */
-.chapter-left { 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    flex: 1; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-}
+.chapter-left { display: flex; align-items: center; gap: 6px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Sağ Taraf (Rozet ve Tarih) */
 .chapter-right { 
@@ -112,19 +91,20 @@ button { cursor: pointer; border: none; outline: none; }
     align-items: center; 
     gap: 8px; 
     flex-shrink: 0;
-    height: 100%; /* Kapsayıcı yüksekliğini al */
+    height: 100%;
 }
 
-/* TARİH YAZISI (Sabit Genişlik) */
+/* TARİH YAZISI */
 .chapter-right span {
     width: 65px;          
     text-align: right;    
-    display: inline-block;
+    display: block;
     color: #777;
     font-size: 10px;
+    line-height: 34px; /* Satır yüksekliğiyle aynı olsun ki ortalansın */
 }
 
-/* ROZET AYARLARI (DÜZELTİLDİ) */
+/* ROZET AYARLARI (YENİ / OKU) - TAM ORTALAMA */
 .badge-new { 
     background: #ff0055; 
     color: #fff; 
@@ -133,19 +113,20 @@ button { cursor: pointer; border: none; outline: none; }
     border-radius: 4px; 
     
     /* KUTU BOYUTLARI */
-    width: 40px !important;      
-    height: 20px !important;     
-    min-width: 40px !important; 
-    min-height: 20px !important;
+    width: 36px !important;      
+    height: 18px !important;     
+    min-width: 36px !important; 
+    min-height: 18px !important;
     
-    /* İÇERİK ORTALAMA */
-    display: flex;     
-    justify-content: center; 
-    align-items: center;     
+    /* İÇERİK ORTALAMA (ZORUNLU) */
+    display: flex !important;     
+    justify-content: center !important; 
+    align-items: center !important;     
     
-    /* Bu satırlar yazının yukarı kaymasını engeller */
-    line-height: normal; 
-    padding-top: 1px; /* Optik dengeleme */
+    /* YAZI AYARLARI (Kaymayı Önler) */
+    line-height: 1 !important; /* Satır yüksekliğini sıfırla */
+    padding: 0 !important;     /* Boşlukları sil */
+    margin: 0 !important;
     
     flex-shrink: 0; 
 }
@@ -212,3 +193,4 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item { color: #666; text-align: center; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
+                 
