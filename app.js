@@ -58,6 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let rows = t.split('\n');
         if (rows.length > 0) rows.shift(); 
 
+        let siralanacakSeriler = []; // Sıralama için boş bir liste oluşturduk
+
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
             if(d.length < 5 || d[0] === "" || d[0].toLowerCase().includes("isim")) return;
@@ -78,13 +80,36 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            let sonBolumler = [...ARSIV[isim].bolumler].reverse().slice(0, 4);
+            // --- YENİ EKLENEN KISIM: TARİHE GÖRE ALGILAMA ---
+            let siralamaTarihi = new Date(0); // Tarih yoksa en alta atar
+            if(tarih) {
+                let p = tarih.split('.');
+                // GGG.AA.YYYY formatını JavaScript'in anlayacağı şekle çeviriyoruz
+                if(p.length === 3) siralamaTarihi = new Date(p[2], p[1] - 1, p[0]);
+            }
+
+            siralanacakSeriler.push({
+                isim: isim,
+                gercekTarihMilisaniye: siralamaTarihi.getTime() // Kolay sıralamak için milisaniyeye çevirdik
+            });
+        });
+
+        // 🚀 İŞTE SİHİR BURADA: LİSTEYİ YENİDEN ESKİYE (TARİHE GÖRE) SIRALIYORUZ
+        siralanacakSeriler.sort((a, b) => b.gercekTarihMilisaniye - a.gercekTarihMilisaniye);
+
+        // Sıralanmış listeyi ekrana bastırıyoruz
+        siralanacakSeriler.forEach(item => {
+            let isim = item.isim;
+            let meta = ARSIV[isim].meta;
+            let bolumler = ARSIV[isim].bolumler;
+
+            let sonBolumler = [...bolumler].reverse().slice(0, 4);
             let bolumListesiHTML = "";
 
             sonBolumler.forEach((b, index) => {
                 let badge = "";
                 let gunFarki = index; 
-                let gorunurTarih = hesaplaZaman(tarih, gunFarki);
+                let gorunurTarih = hesaplaZaman(meta.tarih, gunFarki);
 
                 if(index === 0) {
                     badge = `<span class="badge-new">YENİ</span>`;
@@ -108,13 +133,13 @@ document.addEventListener("DOMContentLoaded", () => {
             let itemHtml = `
             <div class="manga-list-item" onclick="openDetail('${isim}')">
                 <div class="list-poster-area">
-                    <img src="${kapak}" class="list-poster" loading="lazy">
+                    <img src="${meta.kapak}" class="list-poster" loading="lazy">
                 </div>
                 <div class="list-content-area">
                     <div class="list-title">${isim}</div>
                     <div class="list-rating">
-                        <i class="fas fa-star"></i> ${puan} 
-                        <span style="color:#666; margin-left:5px;">• ${tur}</span>
+                        <i class="fas fa-star"></i> ${meta.puan} 
+                        <span style="color:#666; margin-left:5px;">• ${meta.tur}</span>
                     </div>
                     <div class="mini-chapter-list">
                         ${bolumListesiHTML}
@@ -189,7 +214,6 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
     
-    // YORUMLARI YÜKLE
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
     
     if(push) window.scrollTo(0,0);
@@ -247,7 +271,6 @@ function openReader(isim, no, push = true) {
     ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
     sel.value = no;
     
-    // Resimleri ve o bölümün yorumlarını yükler
     resimGetir();
 }
 
@@ -257,7 +280,6 @@ function resimGetir() {
     const box = document.getElementById('box'), loader = document.getElementById('reader-loader'), b = document.getElementById('cSelect').value, v = ARSIV[currentSeri];
     box.innerHTML = ""; loader.style.display = "flex"; document.getElementById('reader-view').scrollTop = 0;
     
-    // URL'yi değiştir (Kullanıcı açılır menüden bölüm seçerse URL güncellensin)
     window.history.replaceState({}, '', `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`);
     
     let loaded = 0;
@@ -270,7 +292,6 @@ function resimGetir() {
         box.appendChild(img);
     }
 
-    // YENİ: Bölüm değiştiği anda o bölümün yorumlarını getir
     loadGraphComment("bolum_"+currentSeri+"_"+b, currentSeri+" Bölüm "+b, "cusdis_chapter");
 }
 
@@ -285,24 +306,20 @@ function onceki() {
     else closeReader();
 }
 
-// --- GRAPHCOMMENT YÜKLEYİCİ (ÇAKIŞMA DÜZELTİLDİ) ---
+// --- GRAPHCOMMENT YÜKLEYİCİ ---
 function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
-    // 1. ÖNEMLİ DÜZELTME: Sayfadaki ESKİ yorum kutusunu tamamen sil (Çakışmayı önler)
     const oldGc = document.getElementById("graphcomment");
     if (oldGc) oldGc.remove();
 
-    // 2. Hedefin içini temizle
     target.innerHTML = ""; 
     
-    // 3. YENİ yorum kutusunu hedefin içine yarat
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
 
-    // Boşlukları ve sorunlu karakterleri ID'den temizle (Güvenlik)
     let safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
 
     window.__semio__params = {
@@ -312,16 +329,14 @@ function loadGraphComment(id, title, cont) {
         }
     };
 
-    // 4. Sistem zaten yüklendiyse (sayfa değiştirildiyse) sadece yenile
     if (typeof window.__semio__gc_graphlogin === 'function') {
         window.__semio__gc_graphlogin(window.__semio__params);
     } else {
-        // Sistem ilk defa açılıyorsa (sayfaya ilk giriş) scripti indir
         let s = document.createElement("script");
         s.type = "text/javascript";
         s.async = true;
         s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
     }
-}
-    
+        }
+                                                              
