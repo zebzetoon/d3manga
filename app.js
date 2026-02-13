@@ -7,8 +7,8 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// 🚨 DİKKAT: GRAPHCOMMENT ID'Nİ BURAYA YAZ 🚨
-const GRAPHCOMMENT_ID = "BURAYA_GRAPHCOMMENT_ID_YAZ"; 
+// GRAPHCOMMENT ID'Nİ BURAYA GİRDİM ✅
+const GRAPHCOMMENT_ID = "ZebzeManga"; 
 // ==========================================
 
 function shuffleArray(array) {
@@ -277,30 +277,40 @@ function onceki() {
     else closeReader();
 }
 
-// --- GRAPHCOMMENT YÜKLEYİCİ ---
+// --- GRAPHCOMMENT YÜKLEYİCİ (GÜNCELLENDİ) ---
 function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
-    target.innerHTML = ""; // Öncekini temizle
+    // 1. Önceki yorum alanını temizle
+    target.innerHTML = ""; 
     
-    // Yeni bir div oluştur (GraphComment buna yapışacak)
+    // 2. GraphComment için hedef div oluştur (Kendi verdikleri ID ile)
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
 
-    // Ayarları tanımla
-    window.gc_params = {
-        graphcomment_id: GRAPHCOMMENT_ID,
-        fixed_header_height: 0,
-        page_id: id,      // Her bölüm için benzersiz ID
-        page_title: title // Bölüm adı
+    // 3. Değişkenleri ayarla (Her sayfa için benzersiz ID)
+    window.__semio__params = {
+        graphcommentId: GRAPHCOMMENT_ID,
+        behaviour: {
+            uid: id, // Sayfaya özel kimlik (örn: seri_OlumPakti)
+        }
     };
 
-    // Scripti yükle
+    // 4. Scripti dinamik olarak yükle
     let s = document.createElement("script");
-    s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
+    s.type = "text/javascript";
     s.async = true;
-    target.appendChild(s);
+    s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
+    
+    // Script yüklendiğinde çalıştır
+    s.onload = function() {
+        if(window.__semio__gc_graphlogin) {
+            window.__semio__gc_graphlogin(window.__semio__params);
         }
-                                                                
+    };
+
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
+        }
+                            
