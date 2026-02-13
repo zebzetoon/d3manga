@@ -186,7 +186,7 @@ button { cursor: pointer; border: none; outline: none; }
 
 /* --- YORUMLAR (OVAL KUTU - KAMUFLAJ MODU) --- */
 .comments-section {
-    margin-top: 40px;
+    margin-top: 75px;
     
     /* OVAL GÖRÜNÜM */
     border-radius: 25px; 
