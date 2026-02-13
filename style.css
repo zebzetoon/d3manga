@@ -200,8 +200,8 @@ button { cursor: pointer; border: none; outline: none; }
     /* Hafif gölge */
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     
-    padding: 0; 
-    padding-bottom: 20px; 
+   /* 🔥 İŞTE BURASI: Üst: 0, Sağ: 15px, Alt: 20px, Sol: 15px 🔥 */
+    padding: 0 15px 20px 15px; 
     
     min-height: 200px;
 }
