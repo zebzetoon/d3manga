@@ -7,8 +7,8 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// CUSDIS ID (SENİNKİ)
-const CUSDIS_APP_ID = "f4a6045a-79c6-451c-a912-2f95e68f305a"; 
+// 🚨 DİKKAT: GRAPHCOMMENT ID'Nİ BURAYA YAZ 🚨
+const GRAPHCOMMENT_ID = "BURAYA_GRAPHCOMMENT_ID_YAZ"; 
 // ==========================================
 
 function shuffleArray(array) {
@@ -38,17 +38,6 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     
     return csvTarih;
 }
-
-// --- YENİ EKLENEN KISIM: Iframe Boyutlandırma Dinleyicisi ---
-// Cusdis'ten gelen mesajı dinler ve iframe boyunu ayarlar
-window.addEventListener('message', function (e) {
-    if (e.data && e.data.from === 'cusdis') {
-        const frame = document.querySelector('#cusdis_thread iframe');
-        if (frame) {
-            frame.style.height = e.data.data + 'px';
-        }
-    }
-});
 
 window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -82,12 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ARSIV[isim] = { 
                 bolumler: [], u: user, r: repo, k: klasor, 
-                meta: { 
-                    kapak, tur, durum, yazar, banner, 
-                    ozet: ozet || "Açıklama bulunamadı.",
-                    tarih: tarih || "",
-                    puan: puan 
-                }
+                meta: { kapak, tur, durum, yazar, banner, ozet: ozet || "Açıklama bulunamadı.", tarih: tarih || "", puan: puan }
             };
             
             let range = aralik.includes('-') ? aralik.split('-') : [aralik, aralik];
@@ -103,9 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 let gorunurTarih = hesaplaZaman(tarih, gunFarki);
 
                 if(index === 0) {
-                    badge = `<span class="badge-new highlight">YENİ</span>`;
+                    badge = `<span class="badge-new">YENİ</span>`;
                 } else {
-                    badge = `<span class="badge-new" style="background:#333; color:#888; border:none;">OKU</span>`;
+                    badge = `<span class="badge-new" style="background:#333; color:#aaa;">OKU</span>`;
                 }
                 
                 bolumListesiHTML += `
@@ -204,7 +188,10 @@ function openDetail(isim, push = true) {
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
-    loadCusdis("seri_" + isim, isim, "cusdis_series");
+    
+    // GRAPHCOMMENT YÜKLE
+    loadGraphComment("seri_" + isim, isim, "cusdis_series");
+    
     if(push) window.scrollTo(0,0);
 }
 
@@ -258,7 +245,9 @@ function openReader(isim, no, push = true) {
     ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
     sel.value = no;
     resimGetir();
-    loadCusdis("bolum_"+isim+"_"+no, isim+" Bölüm "+no, "cusdis_chapter");
+    
+    // GRAPHCOMMENT YÜKLE
+    loadGraphComment("bolum_"+isim+"_"+no, isim+" Bölüm "+no, "cusdis_chapter");
 }
 
 function closeReader() { openDetail(currentSeri, true); }
@@ -288,19 +277,30 @@ function onceki() {
     else closeReader();
 }
 
-function loadCusdis(id, title, cont) {
-    const target = document.getElementById(cont); if (!target) return;
-    target.innerHTML = `<div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="${CUSDIS_APP_ID}" data-page-id="${id}" data-page-url="${window.location.href}" data-page-title="${title}" data-theme="dark" data-lang="tr"></div>`; 
+// --- GRAPHCOMMENT YÜKLEYİCİ ---
+function loadGraphComment(id, title, cont) {
+    const target = document.getElementById(cont);
+    if (!target) return;
+
+    target.innerHTML = ""; // Öncekini temizle
     
-    // GECİKMELİ YÜKLEME 
-    setTimeout(() => {
-        if (window.CUSDIS) {
-            window.CUSDIS.initial();
-        } else {
-            let s = document.createElement("script");
-            s.src = "https://cusdis.com/js/cusdis.es.js";
-            s.async = true;
-            document.body.appendChild(s);
+    // Yeni bir div oluştur (GraphComment buna yapışacak)
+    let gcDiv = document.createElement("div");
+    gcDiv.id = "graphcomment";
+    target.appendChild(gcDiv);
+
+    // Ayarları tanımla
+    window.gc_params = {
+        graphcomment_id: GRAPHCOMMENT_ID,
+        fixed_header_height: 0,
+        page_id: id,      // Her bölüm için benzersiz ID
+        page_title: title // Bölüm adı
+    };
+
+    // Scripti yükle
+    let s = document.createElement("script");
+    s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
+    s.async = true;
+    target.appendChild(s);
         }
-    }, 500); 
-}
+                                                                
