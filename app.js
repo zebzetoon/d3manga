@@ -189,7 +189,7 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
     
-    // GRAPHCOMMENT YÜKLE
+    // YORUMLARI YÜKLE
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
     
     if(push) window.scrollTo(0,0);
@@ -241,13 +241,14 @@ function openReader(isim, no, push = true) {
     currentSeri = isim;
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'block';
-    const sel = document.getElementById('cSelect'); sel.innerHTML = "";
+    
+    const sel = document.getElementById('cSelect'); 
+    sel.innerHTML = "";
     ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
     sel.value = no;
-    resimGetir();
     
-    // GRAPHCOMMENT YÜKLE
-    loadGraphComment("bolum_"+isim+"_"+no, isim+" Bölüm "+no, "cusdis_chapter");
+    // Resimleri ve o bölümün yorumlarını yükler
+    resimGetir();
 }
 
 function closeReader() { openDetail(currentSeri, true); }
@@ -255,6 +256,10 @@ function closeReader() { openDetail(currentSeri, true); }
 function resimGetir() {
     const box = document.getElementById('box'), loader = document.getElementById('reader-loader'), b = document.getElementById('cSelect').value, v = ARSIV[currentSeri];
     box.innerHTML = ""; loader.style.display = "flex"; document.getElementById('reader-view').scrollTop = 0;
+    
+    // URL'yi değiştir (Kullanıcı açılır menüden bölüm seçerse URL güncellensin)
+    window.history.replaceState({}, '', `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`);
+    
     let loaded = 0;
     for(let i=1; i<=MAX_SAYFA; i++) {
         let img = document.createElement("img");
@@ -264,6 +269,9 @@ function resimGetir() {
         img.onerror = function() { this.remove(); if(box.children.length===0) loader.style.display = "none"; };
         box.appendChild(img);
     }
+
+    // YENİ: Bölüm değiştiği anda o bölümün yorumlarını getir
+    loadGraphComment("bolum_"+currentSeri+"_"+b, currentSeri+" Bölüm "+b, "cusdis_chapter");
 }
 
 function sonraki() { 
@@ -277,34 +285,43 @@ function onceki() {
     else closeReader();
 }
 
-// --- GRAPHCOMMENT YÜKLEYİCİ ---
+// --- GRAPHCOMMENT YÜKLEYİCİ (ÇAKIŞMA DÜZELTİLDİ) ---
 function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
+    // 1. ÖNEMLİ DÜZELTME: Sayfadaki ESKİ yorum kutusunu tamamen sil (Çakışmayı önler)
+    const oldGc = document.getElementById("graphcomment");
+    if (oldGc) oldGc.remove();
+
+    // 2. Hedefin içini temizle
     target.innerHTML = ""; 
     
+    // 3. YENİ yorum kutusunu hedefin içine yarat
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
 
+    // Boşlukları ve sorunlu karakterleri ID'den temizle (Güvenlik)
+    let safeId = id.replace(/[^a-zA-Z0-9]/g, '_');
+
     window.__semio__params = {
         graphcommentId: GRAPHCOMMENT_ID,
         behaviour: {
-            uid: id,
+            uid: safeId,
         }
     };
 
-    let s = document.createElement("script");
-    s.type = "text/javascript";
-    s.async = true;
-    s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
-    
-    s.onload = function() {
-        if(window.__semio__gc_graphlogin) {
-            window.__semio__gc_graphlogin(window.__semio__params);
-        }
-    };
-
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
+    // 4. Sistem zaten yüklendiyse (sayfa değiştirildiyse) sadece yenile
+    if (typeof window.__semio__gc_graphlogin === 'function') {
+        window.__semio__gc_graphlogin(window.__semio__params);
+    } else {
+        // Sistem ilk defa açılıyorsa (sayfaya ilk giriş) scripti indir
+        let s = document.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
+    }
 }
+    
