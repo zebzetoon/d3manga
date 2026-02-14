@@ -211,7 +211,7 @@ button { cursor: pointer; border: none; outline: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* --- YORUMLAR --- */
-.comments-section { margin-top: 50px; border-radius: 25px; overflow: hidden; background: #1a1a1a; border: none; padding: 0 15px 20px 15px; min-height: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+.comments-section { margin-top: 50px; border-radius: 25px; overflow: hidden; background: #2a2929; border: none; padding: 0 15px 20px 15px; min-height: 200px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
 .comments-section h3 { margin-top: 20px; margin-bottom: 15px; color: #fff; text-align: center; font-size: 18px; }
 #graphcomment { width: 100%; display: block; background-color: transparent !important; }
 
