@@ -1,4 +1,4 @@
-/* --- 1. GENEL AYARLAR (MOBİL ÖNCELİKLİ - DOKUNULMADI) --- */
+/* --- 1. GENEL AYARLAR (MOBİL ÖNCELİKLİ) --- */
 * { box-sizing: border-box; }
 body { 
     background-color: #000; 
@@ -12,7 +12,7 @@ a { text-decoration: none; color: white; }
 button { cursor: pointer; border: none; outline: none; }
 .loading-text { text-align: center; color: #555; padding: 50px; }
 
-/* --- 2. HEADER (MOBİL) --- */
+/* --- 2. HEADER --- */
 .top-header {
     position: fixed; top: 0; left: 0; width: 100%; height: 60px;
     background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
@@ -52,7 +52,7 @@ button { cursor: pointer; border: none; outline: none; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
 
-/* --- 5. LİSTE VE KARTLAR (MOBİL - DOKUNULMADI) --- */
+/* --- 5. LİSTE VE KARTLAR (MOBİL) --- */
 .manga-list-container { display: flex; flex-direction: column; gap: 15px; }
 .manga-list-item { display: flex; gap: 12px; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; overflow: hidden; position: relative; }
 .list-poster-area { width: 95px; height: 140px; flex-shrink: 0; }
@@ -61,17 +61,18 @@ button { cursor: pointer; border: none; outline: none; }
 .list-title { font-size: 16px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 6px; }
 
-/* BÖLÜM LİSTESİ (MOBİL) */
+/* BÖLÜM LİSTESİ (MOBİL - ALT ALTA) */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
-.mini-chapter-item { background: #1a1a1a; padding: 0 10px; border-radius: 6px; font-size: 11px; color: #ccc; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; height: 34px; cursor: pointer; }
-.chapter-left { display: flex; align-items: center; gap: 6px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chapter-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; height: 100%; }
-.chapter-right span { width: 65px; text-align: right; display: block; color: #777; font-size: 10px; line-height: 34px; }
-.badge-new { background: #ff0055; color: #ffffff !important; font-weight: 900 !important; font-size: 9px; border-radius: 4px; width: 36px !important; height: 18px !important; min-width: 36px !important; min-height: 18px !important; display: flex !important; justify-content: center !important; align-items: center !important; line-height: 1 !important; padding: 0 !important; flex-shrink: 0; }
 
-/* --- 6. DİĞER SAYFALAR (DETAY, OKUYUCU, FOOTER) --- */
+.mini-chapter-item { background: #1a1a1a; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #ccc; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a2a; height: 34px; cursor: pointer; }
+.chapter-left { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+.chapter-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.chapter-right span { color: #777; font-size: 10px; }
+.badge-new { background: #ff0055; color: #fff !important; font-weight: 900; font-size: 9px; border-radius: 4px; padding: 2px 6px; height: 18px; display: flex; align-items: center; justify-content: center; }
+
+/* --- 6. DİĞER SAYFALAR --- */
 #detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d0d; z-index: 2000; overflow-y: auto; display: none; padding-bottom: 100px; padding-top: 60px; }
-.detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; filter: blur(10px); opacity: 0.4; z-index: -1; }
+.detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; filter: blur(10px); opacity: 0.4; z-index: -1; }
 .detail-content { padding: 20px; padding-top: 100px; max-width: 900px; margin: 0 auto; position: relative; }
 .detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; }
 .detail-cover { width: 160px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); margin-bottom: 20px; }
@@ -82,11 +83,8 @@ button { cursor: pointer; border: none; outline: none; }
 .action-buttons { display: flex; gap: 15px; width: 100%; max-width: 400px; margin-bottom: 30px; }
 .btn-icon { width: 50px; background: #222; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 .summary-box { background: #181818; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #2a2a2a; }
-.summary-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #ff0055; }
-.summary-text { font-size: 14px; line-height: 1.6; color: #ddd; }
 .chapter-list-container { background: #181818; border-radius: 15px; padding: 10px; margin-bottom: 30px; border: 1px solid #2a2a2a; }
-.chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-.chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+.chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; cursor: pointer; }
 .hidden-chapter { display: none !important; }
 .expand-btn { width: 100%; padding: 12px; background: #222; color: #aaa; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
 .back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(5px); }
@@ -100,10 +98,10 @@ button { cursor: pointer; border: none; outline: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .comments-section { margin-top: 75px; border-radius: 25px; overflow: hidden; background: #292929; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 0 15px 20px 15px; min-height: 200px; }
-.site-footer { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px 120px 20px; background-color: transparent; text-align: center; position: relative; z-index: 10; }
+.site-footer { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px 120px 20px; text-align: center; position: relative; z-index: 10; }
 .footer-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1a1a1a; }
 .footer-title { font-size: 26px; font-weight: 800; margin-bottom: 15px; color: #fff; }
-.footer-btn { width: 55px; height: 55px; background-color: #222; border-radius: 14px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 22px; transition: all 0.2s ease; border: 1px solid #333; margin: 5px; }
+.footer-btn { width: 55px; height: 55px; background-color: #222; border-radius: 14px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 22px; border: 1px solid #333; margin: 5px; }
 .dmca-btn { font-size: 12px; font-weight: 900; width: auto; padding: 0 18px; min-width: 55px; }
 
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 1000; height: 60px; }
@@ -139,4 +137,76 @@ button { cursor: pointer; border: none; outline: none; }
         gap: 60px; position: relative; z-index: 10;
     }
     .slide-info { flex: 1; max-width: 55%; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-    .slide-title { font-size: 52px; line-height: 1.1; margin-bottom: 20px; font-weight:
+    .slide-title { font-size: 52px; line-height: 1.1; margin-bottom: 20px; font-weight: 900; }
+    .slide-desc { font-size: 17px; max-width: 90%; -webkit-line-clamp: 4; margin-bottom: 35px; line-height: 1.6; color: #eee; }
+    .slide-btn { padding: 15px 35px; font-size: 16px; border-radius: 35px; box-shadow: 0 10px 25px rgba(255, 0, 85, 0.5); }
+    
+    .slide-poster { 
+        width: 320px; height: 320px; border-radius: 50%;
+        object-fit: cover; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        flex-shrink: 0; border: 5px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Dans Eden Slider */
+    .hero-slide:nth-child(even) .slide-content { flex-direction: row-reverse; text-align: right; }
+    .hero-slide:nth-child(even) .slide-desc { margin-left: auto; }
+
+    /* 3. KART YAPISI (GRID) */
+    .manga-list-container { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+        gap: 25px; 
+    }
+    .manga-list-item { 
+        height: auto; 
+        min-height: 190px;
+        display: flex;
+        flex-direction: row;
+    }
+    .list-poster-area {
+        width: 120px;
+        height: auto;
+    }
+
+    /* 🔥 BÖLÜMLER YAN YANA (2 SÜTUN) 🔥 */
+    .mini-chapter-list {
+        display: grid !important; /* Grid sistemini zorla */
+        grid-template-columns: 1fr 1fr; /* 2 Eşit Sütun */
+        gap: 10px; /* Aradaki boşluk */
+        margin-top: auto;
+    }
+    
+    .mini-chapter-item {
+        height: 40px; 
+        padding: 0 12px; 
+    }
+    
+    .chapter-right {
+        display: flex !important;
+        flex-direction: row !important; 
+        align-items: center !important;
+        justify-content: flex-end;
+        gap: 12px;
+        min-width: auto;
+    }
+    .chapter-right span {
+        font-size: 11px;
+        white-space: nowrap;
+        color: #888;
+        line-height: 1;
+        margin: 0;
+    }
+    .badge-new {
+        margin: 0 !important;
+        position: static !important;
+        transform: none !important;
+    }
+    
+    /* GİZLENECEKLER */
+    .bottom-nav { display: none !important; }
+    .top-header { padding: 0 50px; height: 75px; }
+    .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
+    .detail-cover { width: 240px; margin-bottom: 0; }
+    .action-buttons { justify-content: flex-start; }
+    .detail-content { max-width: 1000px; }
+}
