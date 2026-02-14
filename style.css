@@ -236,10 +236,10 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP MODU (TAŞMA DÜZELTİLDİ) */
+/* 💻 PC / DESKTOP MODU (YAN YANA VE DÜZGÜN) */
 /* ========================================== */
 @media (min-width: 1024px) {
-    /* 1. GENEL SAYFA AYARLARI */
+    /* 1. GENEL YERLEŞİM */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
     
     /* 2. KART YAPISI (GRID) */
@@ -248,6 +248,7 @@ button { cursor: pointer; border: none; outline: none; }
         grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
         gap: 25px; 
     }
+    /* Kart yüksekliğini serbest bıraktık, içeriğe göre esnesin */
     .manga-list-item { height: auto; min-height: 190px; }
     
     /* 3. GİZLENECEK VE AYARLANACAKLAR */
@@ -259,27 +260,28 @@ button { cursor: pointer; border: none; outline: none; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
 
-    /* 🔥 DÜZELTME BURADA: BUTONLAR VE ROZETLER 🔥 */
+    /* 🔥 DÜZELTME BURADA: YAN YANA VE TAM ORTALI 🔥 */
     
-    /* Bölüm kutusunun kendisi */
+    /* Bölüm kutusu */
     .mini-chapter-item {
-        height: 36px; /* İdeal yükseklik */
+        height: 40px; /* Rahat sığması için yükseklik */
         display: flex;
-        align-items: center;
-        justify-content: space-between; /* İsim sola, Bilgiler sağa */
-        padding: 0 10px; /* İçerik kenara yapışmasın */
+        align-items: center; /* İçindekileri dikey ortala */
+        justify-content: space-between; 
+        padding: 0 12px; 
         width: 100%;
-        box-sizing: border-box; /* Padding taşma yapmasın */
+        box-sizing: border-box;
     }
 
-    /* Sağ taraf (Rozet + Tarih) */
+    /* Sağ taraf (Rozet ve Tarih Yan Yana) */
     .chapter-right {
         display: flex !important;
-        flex-direction: row !important; /* Yan yana */
-        align-items: center !important;
-        justify-content: flex-end;
-        gap: 8px; /* Rozet ve Tarih arası boşluk */
-        flex-shrink: 0; /* Sıkışmayı engelle */
+        flex-direction: row !important; /* YAN YANA OLSUN */
+        align-items: center !important; /* Dikeyde TAM ORTALA */
+        justify-content: flex-end;      /* Sağa yasla */
+        gap: 12px; /* Birbirine yapışmasın */
+        height: 100%;
+        min-width: auto;
     }
 
     /* Tarih Yazısı */
@@ -287,13 +289,16 @@ button { cursor: pointer; border: none; outline: none; }
         text-align: right;
         font-size: 11px;
         color: #888;
-        white-space: nowrap; /* Tarih alt satıra kaymasın */
+        white-space: nowrap;
+        line-height: 1; /* Satır kaymasını önler */
+        margin: 0;
     }
     
-    /* Rozet (Dışarı taşmayı engeller) */
+    /* Rozet Ayarı */
     .badge-new {
         margin: 0 !important;
+        align-self: center !important; /* Kendini ortala */
         position: static !important;
-        transform: none !important; /* Kaymayı sıfırla */
+        transform: none !important;
     }
 }
