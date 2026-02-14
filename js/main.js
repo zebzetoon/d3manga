@@ -1,13 +1,22 @@
-// Sayfa Geçmişi (Geri Tuşu) Yönetimi
+// Geri Tuşu Yönetimi
 window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const seri = urlParams.get('seri');
     const bolum = urlParams.get('bolum');
+    
+    // Temizlik: Önce hepsini kapat
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('reader-view').style.display = 'none';
+
     if (seri && ARSIV[seri]) {
-        if (bolum) openReader(seri, bolum, false);
-        else openDetail(seri, false);
+        if (bolum) {
+            openReader(seri, bolum, false); // reader.js'den çağırır
+        } else {
+            openDetail(seri, false); // ui.js'den çağırır
+        }
     } else {
-        closeDetail(false);
+        document.getElementById('home-view').style.display = 'block';
     }
 });
 
@@ -41,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // TARİHE GÖRE SIRALAMA VERİSİ HAZIRLAMA
+            // Tarih Sıralaması
             let siralamaTarihi = new Date(0); 
             if(tarih) {
                 let p = tarih.split('.');
@@ -54,10 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // SIRALAMA İŞLEMİ (Yeniden Eskiye)
+        // Yeniden Eskiye Sırala
         siralanacakSeriler.sort((a, b) => b.gercekTarihMilisaniye - a.gercekTarihMilisaniye);
 
-        // KARTLARI BASMA
+        // HTML Oluştur
         siralanacakSeriler.forEach(item => {
             let isim = item.isim;
             let meta = ARSIV[isim].meta;
@@ -110,13 +119,23 @@ document.addEventListener("DOMContentLoaded", () => {
             listContainer.innerHTML += itemHtml;
         });
 
-        // SLIDER BAŞLATMA
+        // Slider Başlat
         let allKeys = Object.keys(ARSIV);
         if(allKeys.length > 0) initSlider(shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5));
 
-        // URL KONTROLÜ (Doğrudan linkle gelindiyse açma)
+        // URL Kontrolü
         const urlParams = new URLSearchParams(window.location.search);
         const s = urlParams.get('seri'), b = urlParams.get('bolum');
-        if (s && ARSIV[s]) b ? openReader(s, b, false) : openDetail(s, false);
+        
+        document.getElementById('home-view').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'none';
+        document.getElementById('reader-view').style.display = 'none';
+
+        if (s && ARSIV[s]) {
+            if(b) openReader(s, b, false);
+            else openDetail(s, false);
+        } else {
+            document.getElementById('home-view').style.display = 'block';
+        }
     });
 });
