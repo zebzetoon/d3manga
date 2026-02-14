@@ -1,4 +1,4 @@
-/* --- 1. GENEL AYARLAR (MOBİL ÖNCELİKLİ) --- */
+/* --- 1. GENEL AYARLAR (MOBİL TEMEL ALINDI) --- */
 * { box-sizing: border-box; }
 body { 
     background-color: #000; 
@@ -39,7 +39,8 @@ button { cursor: pointer; border: none; outline: none; }
 }
 .section-title { font-size: 18px; font-weight: 800; margin: 25px 0 15px 0; color: #eee; border-left: 4px solid #ff0055; padding-left: 10px; }
 
-/* --- 4. SLIDER (MOBİL) --- */
+/* --- 4. SLIDER (MOBİL AYARLARI) --- */
+/* Mobilde sadece arka plan resmi ve yazı olur, poster GİZLENİR */
 .hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 30px; }
 .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
 .hero-slide.active { opacity: 1; z-index: 2; }
@@ -48,6 +49,10 @@ button { cursor: pointer; border: none; outline: none; }
 .slide-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); line-height: 1.1; }
 .slide-desc { font-size: 12px; color: #ddd; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .slide-btn { background: #ff0055; color: white; padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 13px; }
+
+/* MOBİLDE POSTER RESMİNİ GİZLE (Yazının üstüne binmesin diye) */
+.slide-poster { display: none; }
+
 .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 20; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
@@ -61,11 +66,25 @@ button { cursor: pointer; border: none; outline: none; }
 .list-title { font-size: 16px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 6px; }
 
-/* BÖLÜM LİSTESİ (MOBİL - ALT ALTA) */
+/* BÖLÜM LİSTESİ (MOBİL - TEK SÜTUN) */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 
-.mini-chapter-item { background: #1a1a1a; padding: 0 8px; border-radius: 6px; font-size: 11px; color: #ccc; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2a2a2a; height: 34px; cursor: pointer; }
+.mini-chapter-item { 
+    background: #1a1a1a; 
+    padding: 0 8px; 
+    border-radius: 6px; 
+    font-size: 11px; 
+    color: #ccc; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border: 1px solid #2a2a2a; 
+    height: 34px; 
+    cursor: pointer; 
+}
+
 .chapter-left { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+/* Mobilde Rozet ve Tarih Yan Yana */
 .chapter-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .chapter-right span { color: #777; font-size: 10px; }
 .badge-new { background: #ff0055; color: #fff !important; font-weight: 900; font-size: 9px; border-radius: 4px; padding: 2px 6px; height: 18px; display: flex; align-items: center; justify-content: center; }
@@ -141,7 +160,9 @@ button { cursor: pointer; border: none; outline: none; }
     .slide-desc { font-size: 17px; max-width: 90%; -webkit-line-clamp: 4; margin-bottom: 35px; line-height: 1.6; color: #eee; }
     .slide-btn { padding: 15px 35px; font-size: 16px; border-radius: 35px; box-shadow: 0 10px 25px rgba(255, 0, 85, 0.5); }
     
+    /* PC'de Poster Görünür Olsun (Mobilde Gizli) */
     .slide-poster { 
+        display: block !important;
         width: 320px; height: 320px; border-radius: 50%;
         object-fit: cover; box-shadow: 0 25px 60px rgba(0,0,0,0.8);
         flex-shrink: 0; border: 5px solid rgba(255,255,255,0.1);
@@ -168,11 +189,11 @@ button { cursor: pointer; border: none; outline: none; }
         height: auto;
     }
 
-    /* 🔥 BÖLÜMLER YAN YANA (2 SÜTUN) 🔥 */
+    /* 🔥 BÖLÜMLER YAN YANA (SADECE PC İÇİN GRID) 🔥 */
     .mini-chapter-list {
-        display: grid !important; /* Grid sistemini zorla */
+        display: grid !important; 
         grid-template-columns: 1fr 1fr; /* 2 Eşit Sütun */
-        gap: 10px; /* Aradaki boşluk */
+        gap: 10px; 
         margin-top: auto;
     }
     
