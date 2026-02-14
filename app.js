@@ -13,18 +13,54 @@ const GRAPHCOMMENT_ID = "ZebzeManga";
 
 // --- YARDIMCI FONKSİYONLAR ---
 
-// Sayfa Değiştirme Yöneticisi (Çakışmayı Önler)
+// Arama Fonksiyonu
+function searchSeries() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    
+    if (query.length < 2) {
+        alert("En az 2 harf giriniz.");
+        return;
+    }
+
+    const allSeries = Object.keys(ARSIV);
+    const results = allSeries.filter(seri => seri.toLowerCase().includes(query));
+
+    if (results.length === 0) {
+        alert("Seri bulunamadı: " + query);
+    } else if (results.length >= 1) {
+        openDetail(results[0]);
+        document.getElementById('searchInput').value = ""; 
+        document.getElementById('searchInput').blur();
+    }
+}
+
+// Enter tuşu desteği
+const searchInput = document.getElementById('searchInput');
+if(searchInput) {
+    searchInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); 
+            searchSeries();
+        }
+    });
+}
+
 function switchView(viewId) {
-    // 1. Tüm sayfaları gizle
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     
-    // 2. İstenen sayfayı aç
     const target = document.getElementById(viewId);
     if(target) target.style.display = 'block';
 
-    // 3. Sayfayı en tepeye kaydır (Footer altta kalsın diye)
+    // OKUYUCUDA HEADER'I GİZLE
+    const mainHeader = document.getElementById('main-header');
+    if (viewId === 'reader-view') {
+        if(mainHeader) mainHeader.style.display = 'none';
+    } else {
+        if(mainHeader) mainHeader.style.display = 'flex';
+    }
+
     window.scrollTo(0, 0);
 }
 
@@ -100,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // Tarih Sıralaması İçin Hazırlık
             let siralamaTarihi = new Date(0); 
             if(tarih) {
                 let p = tarih.split('.');
@@ -113,10 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // 🚀 LİSTEYİ GÜNCELE GÖRE SIRALA
         siralanacakSeriler.sort((a, b) => b.gercekTarihMilisaniye - a.gercekTarihMilisaniye);
 
-        // KARTLARI OLUŞTUR
         siralanacakSeriler.forEach(item => {
             let isim = item.isim;
             let meta = ARSIV[isim].meta;
@@ -169,11 +202,9 @@ document.addEventListener("DOMContentLoaded", () => {
             listContainer.innerHTML += itemHtml;
         });
 
-        // Slider'ı Başlat
         let allKeys = Object.keys(ARSIV);
         if(allKeys.length > 0) initSlider(shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5));
 
-        // URL Kontrolü (Sayfa yenilenince doğru yerde açılması için)
         const urlParams = new URLSearchParams(window.location.search);
         const s = urlParams.get('seri'), b = urlParams.get('bolum');
         
@@ -221,7 +252,6 @@ function openDetail(isim, push = true) {
     let data = ARSIV[isim];
     if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}`);
 
-    // Detay içeriklerini doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -231,11 +261,7 @@ function openDetail(isim, push = true) {
     document.getElementById('chapter-count').innerText = data.bolumler.length + " Bölüm";
 
     renderChapterList(isim);
-
-    // GÜVENLİ SAYFA DEĞİŞİMİ
     switchView('detail-view');
-    
-    // Yorumları yükle
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
 }
 
@@ -287,7 +313,6 @@ function openReader(isim, no, push = true) {
     if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}&bolum=${no}`);
     currentSeri = isim;
 
-    // GÜVENLİ SAYFA DEĞİŞİMİ
     switchView('reader-view');
     
     const sel = document.getElementById('cSelect'); 
@@ -312,7 +337,6 @@ function resimGetir() {
     box.innerHTML = ""; 
     loader.style.display = "flex"; 
     
-    // Okuyucu içini de yukarı kaydır
     document.getElementById('reader-view').scrollTop = 0;
     
     window.history.replaceState({}, '', `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`);
@@ -352,12 +376,10 @@ function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
-    // Eski yorum kutusunu sil (Çakışmayı önler)
     const oldGc = document.getElementById("graphcomment");
     if (oldGc) oldGc.remove();
     target.innerHTML = ""; 
     
-    // Yeni kutuyu ekle
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
@@ -388,4 +410,4 @@ function loadGraphComment(id, title, cont) {
             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
         }
     }, 150);
-    }
+}
