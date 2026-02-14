@@ -1,4 +1,4 @@
-/* --- 1. GENEL AYARLAR --- */
+/* --- GENEL AYARLAR --- */
 * { box-sizing: border-box; }
 body { 
     background-color: #000; 
@@ -12,19 +12,81 @@ a { text-decoration: none; color: white; }
 button { cursor: pointer; border: none; outline: none; }
 .loading-text { text-align: center; color: #555; padding: 50px; }
 
-/* --- 2. ANA SAYFA DÜZENİ --- */
+/* ========================================== */
+/* YENİ ÜST HEADER (SABİT) */
+/* ========================================== */
+.top-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    z-index: 1000;
+    border-bottom: 1px solid #222;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.header-logo img {
+    height: 35px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    background: #1a1a1a;
+    border-radius: 30px;
+    padding: 0 5px 0 15px;
+    border: 1px solid #333;
+    width: 150px;
+    transition: 0.3s;
+}
+
+.search-container:focus-within {
+    border-color: #ff0055;
+    width: 180px;
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+}
+
+#searchInput {
+    border: none;
+    background: transparent;
+    color: #ddd;
+    font-size: 13px;
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+}
+
+#searchBtn {
+    background: transparent;
+    color: #777;
+    border: none;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 0 30px 30px 0;
+}
+
+/* --- ANA SAYFA DÜZENİ --- */
 .app-container { 
     padding: 15px; 
+    /* Header (60px) + Boşluk (15px) = 75px */
+    padding-top: 75px; 
     display: block; 
     min-height: 100vh; 
     padding-bottom: 80px; 
-    position: relative; 
-    z-index: 1; 
 }
-@media (min-width: 1024px) { .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 15px; } }
-.section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
 
-/* --- 3. KART VE LİSTE --- */
+/* --- LİSTE VE KARTLAR --- */
 .manga-list-container { display: flex; flex-direction: column; gap: 15px; }
 .manga-list-item { display: flex; gap: 12px; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; align-items: flex-start; position: relative; overflow: hidden; }
 .list-poster-area { width: 95px; height: 140px; flex-shrink: 0; cursor: pointer; }
@@ -36,7 +98,6 @@ button { cursor: pointer; border: none; outline: none; }
 /* Bölüm Listesi */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 .mini-chapter-item { background: #1a1a1a; padding: 0 10px; border-radius: 6px; font-size: 11px; color: #ccc; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #222; height: 34px; }
-.mini-chapter-item:hover { background: #333; color: white; border-color: #444; }
 .chapter-left { display: flex; align-items: center; gap: 6px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chapter-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; height: 100%; }
 .chapter-right span { width: 65px; text-align: right; display: block; color: #777; font-size: 10px; line-height: 34px; }
@@ -45,9 +106,8 @@ button { cursor: pointer; border: none; outline: none; }
 .badge-new { background: #ff0055; color: #ffffff !important; font-weight: 900 !important; font-size: 9px; border-radius: 4px; width: 36px !important; height: 18px !important; min-width: 36px !important; min-height: 18px !important; display: flex !important; justify-content: center !important; align-items: center !important; line-height: 1 !important; padding: 0 !important; flex-shrink: 0; }
 .badge-new:not([style]) { background: linear-gradient(135deg, #ff0055 0%, #ff3377 100%); box-shadow: 0 0 8px rgba(255, 0, 85, 0.7); text-shadow: none !important; transform: translateY(-0.5px); }
 
-/* --- 4. SLIDER --- */
+/* --- SLIDER --- */
 .hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-@media (min-width: 1024px) { .hero-slider-container { height: 450px; } }
 .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
 .hero-slide.active { opacity: 1; z-index: 2; }
 .slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(15px) brightness(0.4); z-index: -1; transform: scale(1.1); }
@@ -62,10 +122,10 @@ button { cursor: pointer; border: none; outline: none; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; transition: 0.3s; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
 
-/* --- 5. DETAY SAYFASI --- */
-#detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d0d; z-index: 2000; overflow-y: auto; display: none; padding-bottom: 100px; }
+/* --- DETAY SAYFASI --- */
+#detail-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d0d; z-index: 2000; overflow-y: auto; display: none; padding-bottom: 100px; padding-top: 60px; /* Header Payı */ }
 .detail-banner { width: 100%; height: 350px; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; filter: blur(10px); opacity: 0.4; z-index: -1; }
-.detail-content { padding: 20px; padding-top: 100px; max-width: 900px; margin: 0 auto; position: relative; }
+.detail-content { padding: 20px; padding-top: 40px; max-width: 900px; margin: 0 auto; position: relative; }
 .detail-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; }
 .detail-cover { width: 160px; border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); margin-bottom: 20px; }
 .detail-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
@@ -80,24 +140,23 @@ button { cursor: pointer; border: none; outline: none; }
 .chapter-list-container { background: #181818; border-radius: 15px; padding: 10px; margin-bottom: 30px; border: 1px solid #2a2a2a; }
 .chapter-header { padding: 15px; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-.chapter-item:active { background: #222; }
 .chapter-name { font-weight: 500; font-size: 15px; }
 .hidden-chapter { display: none !important; }
 .expand-btn { width: 100%; padding: 12px; background: #222; color: #aaa; border: none; border-radius: 8px; margin-top: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.back-btn-float { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(5px); }
+.back-btn-float { position: fixed; top: 80px; /* Header altında kalsın */ left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(5px); }
 
-/* --- 6. OKUYUCU SAYFASI (DÜZELTİLDİ) --- */
+/* --- OKUYUCU SAYFASI --- */
 #reader-view { 
-    position: fixed !important; /* Ekrana çivile */
+    position: fixed !important; 
     top: 0; 
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background: #000 !important; /* Arka planı simsiyah yap (Karışmayı önler) */
-    z-index: 99999 !important; /* En üst katmanda olsun */
+    background: #000 !important; 
+    z-index: 99999 !important; 
     overflow-y: scroll; 
     -webkit-overflow-scrolling: touch;
-    display: none; /* Başlangıçta gizli */
+    display: none; 
 }
 
 /* Okuyucu Üst Menü */
@@ -127,92 +186,36 @@ button { cursor: pointer; border: none; outline: none; }
 .spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 0, 85, 0.2); border-left-color: #ff0055; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* --- 7. YORUMLAR KUTUSU --- */
+/* --- YORUMLAR --- */
 .comments-section { margin-top: 75px; border-radius: 25px; overflow: hidden; background: #292929; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 0 15px 20px 15px; min-height: 200px; }
 .comments-section h3 { margin-top: 20px; margin-bottom: 10px; color: #fff; text-align: center; }
 #graphcomment { width: 100%; display: block; background-color: transparent !important; }
 
-/* --- 8. YENİ FOOTER TASARIMI (GRIM SCANS STİLİ) --- */
+/* --- FOOTER --- */
 .site-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px 120px 20px; /* Geniş boşluk */
+    padding: 60px 20px 120px 20px; 
     background-color: transparent;
     text-align: center;
     position: relative;
     z-index: 10;
 }
-
-.footer-logo {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-    border: 3px solid #1a1a1a;
-}
-
-.footer-title {
-    font-size: 26px;
-    font-weight: 800;
-    margin-bottom: 15px;
-    color: #fff;
-    letter-spacing: 0.5px;
-}
-
-.footer-desc {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 35px;
-    max-width: 500px;
-    line-height: 1.6;
-}
-
-/* Kare Butonlar */
-.footer-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.footer-btn {
-    width: 55px;
-    height: 55px;
-    background-color: #222; /* Koyu Gri */
-    border-radius: 14px;      /* Hafif yuvarlak köşe */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-size: 22px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid #333;
-}
-
-/* Hover Efektleri */
+.footer-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 3px solid #1a1a1a; }
+.footer-title { font-size: 26px; font-weight: 800; margin-bottom: 15px; color: #fff; letter-spacing: 0.5px; }
+.footer-desc { font-size: 14px; color: #ccc; margin-bottom: 35px; max-width: 500px; line-height: 1.6; }
+.footer-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.footer-btn { width: 55px; height: 55px; background-color: #222; border-radius: 14px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 22px; transition: all 0.2s ease; border: 1px solid #333; }
 .footer-btn:hover { background-color: #333; border-color: #555; transform: translateY(-3px); }
-.footer-btn .fa-discord { color: #5865F2; } /* Discord Mavisi */
-.footer-btn .fa-mug-hot { color: #FFA500; } /* Kahve Turuncusu */
-.footer-btn .fa-globe { color: #00d2ff; }   /* Web Mavisi */
+.footer-btn .fa-discord { color: #5865F2; }
+.footer-btn .fa-mug-hot { color: #FFA500; }
+.footer-btn .fa-globe { color: #00d2ff; }
+.dmca-btn { font-size: 12px; font-weight: 900; letter-spacing: 0.5px; width: auto; padding: 0 18px; min-width: 55px; }
 
-/* DMCA Yazısı (Buton içinde) */
-.dmca-btn {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    width: auto;
-    padding: 0 18px; /* Genişlik yazıya göre */
-    min-width: 55px;
-}
-
-/* --- 9. ALT MENÜ --- */
+/* --- ALT MENÜ --- */
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 1000; height: 60px; }
 .nav-item { color: #666; text-align: center; font-size: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 25%; }
 .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
 .nav-item.active { color: #ff0055; }
-             
