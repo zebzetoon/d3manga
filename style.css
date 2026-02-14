@@ -236,53 +236,64 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP MODU (ESKİ HALİNE DÖNÜŞ) */
+/* 💻 PC / DESKTOP MODU (TAŞMA DÜZELTİLDİ) */
 /* ========================================== */
 @media (min-width: 1024px) {
-    /* 1. GENEL YERLEŞİM (Standart) */
+    /* 1. GENEL SAYFA AYARLARI */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
-    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
+    
+    /* 2. KART YAPISI (GRID) */
+    .manga-list-container { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+        gap: 25px; 
+    }
     .manga-list-item { height: auto; min-height: 190px; }
+    
+    /* 3. GİZLENECEK VE AYARLANACAKLAR */
     .bottom-nav { display: none !important; }
     .top-header { padding: 0 50px; height: 75px; }
     .hero-slider-container { height: 420px; }
-    
-    /* Detay Sayfası */
     .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
     .detail-cover { width: 240px; margin-bottom: 0; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
 
-    /* 🔥 DÜZELTME BURADA: TARIH VE ROZET YAN YANA 🔥 */
+    /* 🔥 DÜZELTME BURADA: BUTONLAR VE ROZETLER 🔥 */
+    
+    /* Bölüm kutusunun kendisi */
     .mini-chapter-item {
-        height: 34px; /* Eski standart yükseklik */
+        height: 36px; /* İdeal yükseklik */
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: space-between; /* İsim sola, Bilgiler sağa */
+        padding: 0 10px; /* İçerik kenara yapışmasın */
+        width: 100%;
+        box-sizing: border-box; /* Padding taşma yapmasın */
     }
 
+    /* Sağ taraf (Rozet + Tarih) */
     .chapter-right {
         display: flex !important;
-        flex-direction: row !important; /* YAN YANA OLSUN */
-        align-items: center !important; /* Ortala */
-        justify-content: flex-end; /* Sağa yasla */
-        gap: 10px; /* Aradaki boşluk */
-        height: 100%;
-        min-width: auto; /* Genişlik serbest */
-        margin-left: auto;
+        flex-direction: row !important; /* Yan yana */
+        align-items: center !important;
+        justify-content: flex-end;
+        gap: 8px; /* Rozet ve Tarih arası boşluk */
+        flex-shrink: 0; /* Sıkışmayı engelle */
     }
 
+    /* Tarih Yazısı */
     .chapter-right span {
         text-align: right;
-        width: auto;
-        margin: 0;
-        display: block;
-        line-height: 34px; /* Ortalamak için */
+        font-size: 11px;
+        color: #888;
+        white-space: nowrap; /* Tarih alt satıra kaymasın */
     }
     
-    /* Rozet ayarı (Eski boyut) */
+    /* Rozet (Dışarı taşmayı engeller) */
     .badge-new {
         margin: 0 !important;
-        align-self: center !important;
+        position: static !important;
+        transform: none !important; /* Kaymayı sıfırla */
     }
 }
