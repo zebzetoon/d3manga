@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let rows = t.split('\n');
         if (rows.length > 0) rows.shift(); 
 
-        let siralanacakSeriler = []; // Sıralama için boş bir liste oluşturduk
+        let siralanacakSeriler = [];
 
         rows.forEach((l) => {
             let d = l.split(',').map(x => x.trim());
@@ -80,24 +80,22 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // --- YENİ EKLENEN KISIM: TARİHE GÖRE ALGILAMA ---
-            let siralamaTarihi = new Date(0); // Tarih yoksa en alta atar
+            // TARİHE GÖRE SIRALAMA ALGORİTMASI
+            let siralamaTarihi = new Date(0); 
             if(tarih) {
                 let p = tarih.split('.');
-                // GGG.AA.YYYY formatını JavaScript'in anlayacağı şekle çeviriyoruz
                 if(p.length === 3) siralamaTarihi = new Date(p[2], p[1] - 1, p[0]);
             }
 
             siralanacakSeriler.push({
                 isim: isim,
-                gercekTarihMilisaniye: siralamaTarihi.getTime() // Kolay sıralamak için milisaniyeye çevirdik
+                gercekTarihMilisaniye: siralamaTarihi.getTime() 
             });
         });
 
-        // 🚀 İŞTE SİHİR BURADA: LİSTEYİ YENİDEN ESKİYE (TARİHE GÖRE) SIRALIYORUZ
+        // LİSTEYİ YENİDEN ESKİYE SIRALA
         siralanacakSeriler.sort((a, b) => b.gercekTarihMilisaniye - a.gercekTarihMilisaniye);
 
-        // Sıralanmış listeyi ekrana bastırıyoruz
         siralanacakSeriler.forEach(item => {
             let isim = item.isim;
             let meta = ARSIV[isim].meta;
@@ -214,6 +212,7 @@ function openDetail(isim, push = true) {
     document.getElementById('detail-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
     
+    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
     
     if(push) window.scrollTo(0,0);
@@ -292,6 +291,7 @@ function resimGetir() {
         box.appendChild(img);
     }
 
+    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
     loadGraphComment("bolum_"+currentSeri+"_"+b, currentSeri+" Bölüm "+b, "cusdis_chapter");
 }
 
@@ -306,16 +306,17 @@ function onceki() {
     else closeReader();
 }
 
-// --- GRAPHCOMMENT YÜKLEYİCİ ---
+// --- GRAPHCOMMENT YÜKLEYİCİ (ZAMANLAYICI EKLENDİ) ---
 function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
+    // 1. Önceki yorum alanını tamamen temizle (Çakışmayı önler)
     const oldGc = document.getElementById("graphcomment");
     if (oldGc) oldGc.remove();
-
     target.innerHTML = ""; 
     
+    // 2. Yeni kutuyu oluştur
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
@@ -329,14 +330,27 @@ function loadGraphComment(id, title, cont) {
         }
     };
 
-    if (typeof window.__semio__gc_graphlogin === 'function') {
-        window.__semio__gc_graphlogin(window.__semio__params);
-    } else {
-        let s = document.createElement("script");
-        s.type = "text/javascript";
-        s.async = true;
-        s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
-    }
+    // 3. SETTIMEOUT İLE GECİKMELİ YÜKLEME
+    // Bu sayede tarayıcı sayfayı render edip kutuyu oluşturana kadar kod bekler.
+    setTimeout(() => {
+        if (typeof window.__semio__gc_graphlogin === 'function') {
+            window.__semio__gc_graphlogin(window.__semio__params);
+        } else {
+            let s = document.createElement("script");
+            s.type = "text/javascript";
+            s.async = true;
+            s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
+            
+            s.onload = function() {
+                // Script yüklendiğinde de biraz bekle, garanti olsun
+                setTimeout(() => {
+                    if(window.__semio__gc_graphlogin) {
+                        window.__semio__gc_graphlogin(window.__semio__params);
+                    }
+                }, 100);
+            };
+
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
         }
-                                                              
+    }, 150); // 150 milisaniye bekleme süresi (İdeal)
+                                   }
