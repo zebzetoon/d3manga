@@ -236,79 +236,88 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP MODU (SLIDER DÜZELTİLDİ) */
+/* 💻 PC / DESKTOP MODU (OVAL VE DİNAMİK SLIDER) */
 /* ========================================== */
 @media (min-width: 1024px) {
-    /* 1. GENEL YERLEŞİM */
+    /* 1. GENEL YERLEŞİM (Dokunulmadı) */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
     
+    /* 2. KART YAPISI (GRID - Dokunulmadı) */
+    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
+    .manga-list-item { height: auto; min-height: 190px; }
+
     /* 🔥 DÜZELTME BURADA: SLIDER AYARLARI 🔥 */
     .hero-slider-container { 
-        height: 450px; /* Yükseklik PC'ye uygun artırıldı */
-        width: 100%; /* Tam genişlik */
-        border-radius: 20px;
+        height: 480px; /* Biraz daha yükseklik verelim */
+        width: 100%;
+        border-radius: 24px; /* Konteyner köşeleri */
         margin-bottom: 40px;
-        /* İçerik hizalamasını düzeltmek için flex ekliyoruz */
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative; /* İçindeki öğeler için referans */
+        position: relative;
         overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
 
-    /* Arka Plan Görseli */
+    /* Arka Plan Görseli (Daha net ve bulanık) */
     .slide-bg {
-        width: 100% !important; /* Tam genişlik */
-        height: 100% !important; /* Tam yükseklik */
-        object-fit: cover; /* Görüntüyü kırparak doldur */
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
         position: absolute;
         top: 0; left: 0;
-        filter: blur(20px) brightness(0.4) !important; /* PC için daha fazla blur */
+        filter: blur(30px) brightness(0.3) !important;
+        transform: scale(1.2); /* Kenar boşluklarını önle */
     }
     
     /* Slider İçeriği */
     .slide-content {
         width: 100% !important;
-        max-width: 1000px; /* İçeriği ortada tut */
-        padding: 0 40px; /* Kenarlardan boşluk */
+        max-width: 1100px;
+        padding: 0 50px;
         display: flex;
         align-items: center;
-        justify-content: space-between; /* Yazı sola, Poster sağa */
-        gap: 40px;
-        position: relative; /* z-index çalışsın */
+        justify-content: space-between;
+        gap: 60px; /* Yazı ve Poster arasını aç */
+        position: relative;
         z-index: 10;
     }
 
+    /* Yazı Alanı */
     .slide-info {
-        flex: 1; /* Kalan alanı kapla */
-        max-width: 60%; /* Yazıların genişliğini sınırla */
+        flex: 1;
+        max-width: 55%; /* Yazı genişliğini sınırla */
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
     }
-
-    .slide-title { 
-        font-size: 48px; /* Başlık devasa olsun */
-        line-height: 1.1; 
-        margin-bottom: 20px; 
-    }
+    .slide-title { font-size: 52px; line-height: 1.1; margin-bottom: 20px; font-weight: 900; }
+    .slide-desc { font-size: 17px; max-width: 90%; -webkit-line-clamp: 4; margin-bottom: 35px; line-height: 1.6; color: #eee; }
+    .slide-btn { padding: 15px 35px; font-size: 16px; border-radius: 35px; box-shadow: 0 10px 25px rgba(255, 0, 85, 0.5); }
     
-    .slide-desc { 
-        font-size: 16px; 
-        max-width: 90%;
-        -webkit-line-clamp: 4; 
-        margin-bottom: 30px; 
-    }
-    
+    /* Poster (OVAL YAPILDI) */
     .slide-poster { 
-        width: 240px; /* Poster PC'de büyük olsun */
-        height: 360px; 
-        box-shadow: 0 25px 60px rgba(0,0,0,0.8); /* Derinlik ver */
-        flex-shrink: 0; /* Sıkışmasını engelle */
+        width: 320px; /* Genişlik */
+        height: 320px; /* Yükseklik (Kare olmalı ki tam daire olsun) */
+        border-radius: 50%; /* TAM OVAL (DAİRE) */
+        object-fit: cover; /* Resmi daireye sığdır */
+        box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        flex-shrink: 0;
+        border: 5px solid rgba(255,255,255,0.1); /* Şık bir çerçeve */
     }
 
-    /* 2. KART YAPISI (GRID - DOKUNULMADI) */
-    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
-    .manga-list-item { height: auto; min-height: 190px; }
-    
-    /* 3. GİZLENECEK VE AYARLANACAKLAR (DOKUNULMADI) */
+    /* 🔥 DİNAMİK YERLEŞİM (DANS EDEN SLIDER) 🔥 */
+    /* Çift numaralı slaytlarda (2, 4, 6...) içeriğin yönünü ters çevir */
+    .hero-slide:nth-child(even) .slide-content {
+        flex-direction: row-reverse; /* Poster sola, Yazı sağa geçer */
+        text-align: right; /* Yazıları sağa yasla */
+    }
+
+    /* Sağ tarafa geçen yazılar için özel ayar */
+    .hero-slide:nth-child(even) .slide-desc {
+        margin-left: auto; /* Açıklamayı sağa it */
+    }
+
+    /* 3. DİĞER AYARLAR (Dokunulmadı) */
     .bottom-nav { display: none !important; }
     .top-header { padding: 0 50px; height: 75px; }
     .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
@@ -316,12 +325,8 @@ button { cursor: pointer; border: none; outline: none; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
 
-    /* 4. BÖLÜM LİSTESİ (DOKUNULMADI) */
-    .mini-chapter-item {
-        height: 40px; 
-        display: flex; align-items: center; justify-content: space-between; 
-        padding: 0 10px; width: 100%; box-sizing: border-box; overflow: hidden;
-    }
+    /* 4. BÖLÜM LİSTESİ (Dokunulmadı) */
+    .mini-chapter-item { height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; width: 100%; box-sizing: border-box; overflow: hidden; }
     .chapter-left { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
     .chapter-right { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-end; gap: 10px; height: 100%; min-width: 120px; flex-shrink: 0; }
     .chapter-right span { text-align: right; font-size: 11px; color: #888; white-space: nowrap; line-height: 1; margin: 0; flex-shrink: 0; }
