@@ -7,9 +7,26 @@ let sliderInterval = null;
 let sortDesc = true; 
 
 // ==========================================
-// GRAPHCOMMENT ID
+// AYARLAR
 const GRAPHCOMMENT_ID = "ZebzeManga"; 
 // ==========================================
+
+// --- YARDIMCI FONKSİYONLAR ---
+
+// Sayfa Değiştirme Yöneticisi (Çakışmayı Önler)
+function switchView(viewId) {
+    // 1. Tüm sayfaları gizle
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('reader-view').style.display = 'none';
+    
+    // 2. İstenen sayfayı aç
+    const target = document.getElementById(viewId);
+    if(target) target.style.display = 'block';
+
+    // 3. Sayfayı en tepeye kaydır (Footer altta kalsın diye)
+    window.scrollTo(0, 0);
+}
 
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
@@ -39,10 +56,12 @@ function hesaplaZaman(csvTarih, gunGeriyeGit = 0) {
     return csvTarih;
 }
 
+// --- GERİ TUŞU YÖNETİMİ ---
 window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const seri = urlParams.get('seri');
     const bolum = urlParams.get('bolum');
+    
     if (seri && ARSIV[seri]) {
         if (bolum) openReader(seri, bolum, false);
         else openDetail(seri, false);
@@ -51,6 +70,7 @@ window.addEventListener('popstate', () => {
     }
 });
 
+// --- BAŞLANGIÇ ---
 document.addEventListener("DOMContentLoaded", () => {
     fetch('liste.csv?t=' + CACHE_ID).then(r => r.text()).then(t => {
         const listContainer = document.getElementById('manga-list');
@@ -80,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for(let i=parseInt(range[0]); i<=parseInt(range[1]); i++) ARSIV[isim].bolumler.push(i);
             ARSIV[isim].bolumler.sort((a,b) => a - b); 
 
-            // TARİHE GÖRE SIRALAMA ALGORİTMASI
+            // Tarih Sıralaması İçin Hazırlık
             let siralamaTarihi = new Date(0); 
             if(tarih) {
                 let p = tarih.split('.');
@@ -93,9 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // LİSTEYİ YENİDEN ESKİYE SIRALA
+        // 🚀 LİSTEYİ GÜNCELE GÖRE SIRALA
         siralanacakSeriler.sort((a, b) => b.gercekTarihMilisaniye - a.gercekTarihMilisaniye);
 
+        // KARTLARI OLUŞTUR
         siralanacakSeriler.forEach(item => {
             let isim = item.isim;
             let meta = ARSIV[isim].meta;
@@ -148,15 +169,24 @@ document.addEventListener("DOMContentLoaded", () => {
             listContainer.innerHTML += itemHtml;
         });
 
+        // Slider'ı Başlat
         let allKeys = Object.keys(ARSIV);
         if(allKeys.length > 0) initSlider(shuffleArray(allKeys.map(k => ({isim: k, meta: ARSIV[k].meta}))).slice(0, 5));
 
+        // URL Kontrolü (Sayfa yenilenince doğru yerde açılması için)
         const urlParams = new URLSearchParams(window.location.search);
         const s = urlParams.get('seri'), b = urlParams.get('bolum');
-        if (s && ARSIV[s]) b ? openReader(s, b, false) : openDetail(s, false);
+        
+        if (s && ARSIV[s]) {
+            if (b) openReader(s, b, false);
+            else openDetail(s, false);
+        } else {
+            switchView('home-view');
+        }
     });
 });
 
+// --- SLIDER FONKSİYONLARI ---
 function initSlider(items) {
     const wrapper = document.getElementById('hero-wrapper'), dots = document.getElementById('slider-dots');
     wrapper.innerHTML = ""; dots.innerHTML = "";
@@ -181,14 +211,7 @@ function startSliderTimer(total) {
     sliderInterval = setInterval(() => changeSlide((currentIdx + 1) % total), 6000);
 }
 
-function toggleSort() {
-    sortDesc = !sortDesc;
-    const icon = document.getElementById('sort-icon');
-    if(sortDesc) icon.className = "fas fa-sort-numeric-down-alt"; 
-    else icon.className = "fas fa-sort-numeric-down"; 
-    if(currentSeri) renderChapterList(currentSeri);
-}
-
+// --- DETAY SAYFASI ---
 function openDetail(isim, push = true) {
     currentSeri = isim;
     sortDesc = true; 
@@ -198,6 +221,7 @@ function openDetail(isim, push = true) {
     let data = ARSIV[isim];
     if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}`);
 
+    // Detay içeriklerini doldur
     document.getElementById('detail-bg').style.backgroundImage = `url('${data.meta.banner}')`;
     document.getElementById('detail-cover-img').src = data.meta.kapak;
     document.getElementById('detail-title-text').innerText = isim;
@@ -208,14 +232,16 @@ function openDetail(isim, push = true) {
 
     renderChapterList(isim);
 
-    document.getElementById('home-view').style.display = 'none';
-    document.getElementById('detail-view').style.display = 'block';
-    document.getElementById('reader-view').style.display = 'none';
+    // GÜVENLİ SAYFA DEĞİŞİMİ
+    switchView('detail-view');
     
-    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
+    // Yorumları yükle
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
-    
-    if(push) window.scrollTo(0,0);
+}
+
+function closeDetail(push = true) {
+    if (push) window.history.pushState({}, '', window.location.pathname);
+    switchView('home-view');
 }
 
 function renderChapterList(isim) {
@@ -248,36 +274,46 @@ function expandChapters() {
     document.getElementById('expand-btn').style.display = "none";
 }
 
-function closeDetail(push = true) {
-    if (push) window.history.pushState({}, '', window.location.pathname);
-    document.getElementById('detail-view').style.display = 'none';
-    document.getElementById('reader-view').style.display = 'none';
-    document.getElementById('home-view').style.display = 'block';
+function toggleSort() {
+    sortDesc = !sortDesc;
+    const icon = document.getElementById('sort-icon');
+    if(sortDesc) icon.className = "fas fa-sort-numeric-down-alt"; 
+    else icon.className = "fas fa-sort-numeric-down"; 
+    if(currentSeri) renderChapterList(currentSeri);
 }
 
-function startReading() {
-    if(currentSeri && ARSIV[currentSeri]) openReader(currentSeri, ARSIV[currentSeri].bolumler[0]);
-}
-
+// --- OKUYUCU MANTIĞI ---
 function openReader(isim, no, push = true) {
     if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}&bolum=${no}`);
     currentSeri = isim;
-    document.getElementById('detail-view').style.display = 'none';
-    document.getElementById('reader-view').style.display = 'block';
+
+    // GÜVENLİ SAYFA DEĞİŞİMİ
+    switchView('reader-view');
     
     const sel = document.getElementById('cSelect'); 
     sel.innerHTML = "";
-    ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
-    sel.value = no;
+    if(ARSIV[isim] && ARSIV[isim].bolumler) {
+        ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
+        sel.value = no;
+    }
     
     resimGetir();
 }
 
-function closeReader() { openDetail(currentSeri, true); }
+function closeReader() { 
+    openDetail(currentSeri, true); 
+}
 
 function resimGetir() {
-    const box = document.getElementById('box'), loader = document.getElementById('reader-loader'), b = document.getElementById('cSelect').value, v = ARSIV[currentSeri];
-    box.innerHTML = ""; loader.style.display = "flex"; document.getElementById('reader-view').scrollTop = 0;
+    const box = document.getElementById('box'), loader = document.getElementById('reader-loader');
+    const b = document.getElementById('cSelect').value;
+    const v = ARSIV[currentSeri];
+    
+    box.innerHTML = ""; 
+    loader.style.display = "flex"; 
+    
+    // Okuyucu içini de yukarı kaydır
+    document.getElementById('reader-view').scrollTop = 0;
     
     window.history.replaceState({}, '', `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`);
     
@@ -286,12 +322,12 @@ function resimGetir() {
         let img = document.createElement("img");
         let path = `https://cdn.jsdelivr.net/gh/${v.u}/${v.r}/${v.k==='.'?'':v.k+'/'}${b}/${i}.jpg`;
         img.src = IS_MOBILE ? `https://wsrv.nl/?url=${encodeURIComponent(path)}&w=800&output=jpg` : path;
-        img.onload = () => { loaded++; if(loaded>1) loader.style.display = "none"; };
-        img.onerror = function() { this.remove(); if(box.children.length===0) loader.style.display = "none"; };
+        
+        img.onload = () => { loaded++; if(loaded>0) loader.style.display = "none"; };
+        img.onerror = function() { this.remove(); if(box.children.length===0 && i > 5) loader.style.display = "none"; };
         box.appendChild(img);
     }
 
-    // GECİKMELİ YÜKLEME (SORUNU ÇÖZEN KISIM)
     loadGraphComment("bolum_"+currentSeri+"_"+b, currentSeri+" Bölüm "+b, "cusdis_chapter");
 }
 
@@ -300,23 +336,28 @@ function sonraki() {
     if(s.selectedIndex < s.options.length-1) { s.selectedIndex++; resimGetir(); }
     else alert("Son bölüm!");
 }
+
 function onceki() { 
     const s = document.getElementById('cSelect');
     if(s.selectedIndex > 0) { s.selectedIndex--; resimGetir(); }
     else closeReader();
 }
 
-// --- GRAPHCOMMENT YÜKLEYİCİ (ZAMANLAYICI EKLENDİ) ---
+function startReading() {
+    if(currentSeri && ARSIV[currentSeri]) openReader(currentSeri, ARSIV[currentSeri].bolumler[0]);
+}
+
+// --- GRAPHCOMMENT YÜKLEYİCİ ---
 function loadGraphComment(id, title, cont) {
     const target = document.getElementById(cont);
     if (!target) return;
 
-    // 1. Önceki yorum alanını tamamen temizle (Çakışmayı önler)
+    // Eski yorum kutusunu sil (Çakışmayı önler)
     const oldGc = document.getElementById("graphcomment");
     if (oldGc) oldGc.remove();
     target.innerHTML = ""; 
     
-    // 2. Yeni kutuyu oluştur
+    // Yeni kutuyu ekle
     let gcDiv = document.createElement("div");
     gcDiv.id = "graphcomment";
     target.appendChild(gcDiv);
@@ -325,13 +366,9 @@ function loadGraphComment(id, title, cont) {
 
     window.__semio__params = {
         graphcommentId: GRAPHCOMMENT_ID,
-        behaviour: {
-            uid: safeId,
-        }
+        behaviour: { uid: safeId }
     };
 
-    // 3. SETTIMEOUT İLE GECİKMELİ YÜKLEME
-    // Bu sayede tarayıcı sayfayı render edip kutuyu oluşturana kadar kod bekler.
     setTimeout(() => {
         if (typeof window.__semio__gc_graphlogin === 'function') {
             window.__semio__gc_graphlogin(window.__semio__params);
@@ -342,15 +379,13 @@ function loadGraphComment(id, title, cont) {
             s.src = "https://integration.graphcomment.com/gc_graphlogin.js?" + Date.now();
             
             s.onload = function() {
-                // Script yüklendiğinde de biraz bekle, garanti olsun
                 setTimeout(() => {
                     if(window.__semio__gc_graphlogin) {
                         window.__semio__gc_graphlogin(window.__semio__params);
                     }
                 }, 100);
             };
-
             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
         }
-    }, 150); // 150 milisaniye bekleme süresi (İdeal)
-                                   }
+    }, 150);
+    }
