@@ -236,52 +236,79 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP MODU (SLIDER VE KART DÜZELTME) */
+/* 💻 PC / DESKTOP MODU (SLIDER DÜZELTİLDİ) */
 /* ========================================== */
 @media (min-width: 1024px) {
     /* 1. GENEL YERLEŞİM */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
     
-    /* 2. SLIDER AYARLARI (GÜÇLENDİRİLDİ) */
+    /* 🔥 DÜZELTME BURADA: SLIDER AYARLARI 🔥 */
     .hero-slider-container { 
-        height: 450px; /* Yüksekliği artırdık */
+        height: 450px; /* Yükseklik PC'ye uygun artırıldı */
+        width: 100%; /* Tam genişlik */
         border-radius: 20px;
         margin-bottom: 40px;
+        /* İçerik hizalamasını düzeltmek için flex ekliyoruz */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative; /* İçindeki öğeler için referans */
+        overflow: hidden;
+    }
+
+    /* Arka Plan Görseli */
+    .slide-bg {
+        width: 100% !important; /* Tam genişlik */
+        height: 100% !important; /* Tam yükseklik */
+        object-fit: cover; /* Görüntüyü kırparak doldur */
+        position: absolute;
+        top: 0; left: 0;
+        filter: blur(20px) brightness(0.4) !important; /* PC için daha fazla blur */
     }
     
+    /* Slider İçeriği */
     .slide-content {
-        padding: 0 60px; /* İçerik kenara yapışmasın */
-        gap: 40px; /* Yazı ve Poster arasını aç */
+        width: 100% !important;
+        max-width: 1000px; /* İçeriği ortada tut */
+        padding: 0 40px; /* Kenarlardan boşluk */
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Yazı sola, Poster sağa */
+        gap: 40px;
+        position: relative; /* z-index çalışsın */
+        z-index: 10;
+    }
+
+    .slide-info {
+        flex: 1; /* Kalan alanı kapla */
+        max-width: 60%; /* Yazıların genişliğini sınırla */
     }
 
     .slide-title { 
-        font-size: 42px; /* Başlık devasa olsun */
+        font-size: 48px; /* Başlık devasa olsun */
         line-height: 1.1; 
-        margin-bottom: 15px; 
+        margin-bottom: 20px; 
     }
     
     .slide-desc { 
         font-size: 16px; 
-        max-width: 600px; 
-        -webkit-line-clamp: 4; /* Daha fazla satır göster */
-        margin-bottom: 25px; 
+        max-width: 90%;
+        -webkit-line-clamp: 4; 
+        margin-bottom: 30px; 
     }
     
     .slide-poster { 
-        width: 220px; /* Poster PC'de büyük olsun */
-        height: 330px; 
-        box-shadow: 0 20px 50px rgba(0,0,0,0.8); /* Derinlik ver */
+        width: 240px; /* Poster PC'de büyük olsun */
+        height: 360px; 
+        box-shadow: 0 25px 60px rgba(0,0,0,0.8); /* Derinlik ver */
+        flex-shrink: 0; /* Sıkışmasını engelle */
     }
 
-    /* 3. KART YAPISI (GRID) */
-    .manga-list-container { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
-        gap: 25px; 
-    }
+    /* 2. KART YAPISI (GRID - DOKUNULMADI) */
+    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
     .manga-list-item { height: auto; min-height: 190px; }
     
-    /* 4. GİZLENECEK VE AYARLANACAKLAR */
+    /* 3. GİZLENECEK VE AYARLANACAKLAR (DOKUNULMADI) */
     .bottom-nav { display: none !important; }
     .top-header { padding: 0 50px; height: 75px; }
     .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
@@ -289,40 +316,14 @@ button { cursor: pointer; border: none; outline: none; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
 
-    /* 5. KART İÇİ DÜZEN (Oku/Yeni HİZASI - DOKUNULMADI) */
+    /* 4. BÖLÜM LİSTESİ (DOKUNULMADI) */
     .mini-chapter-item {
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between; 
-        padding: 0 12px; 
-        width: 100%;
-        box-sizing: border-box;
+        height: 40px; 
+        display: flex; align-items: center; justify-content: space-between; 
+        padding: 0 10px; width: 100%; box-sizing: border-box; overflow: hidden;
     }
-
-    .chapter-right {
-        display: flex !important;
-        flex-direction: row !important; /* YAN YANA */
-        align-items: center !important; /* DİKEYDE ORTALI */
-        justify-content: flex-end;
-        gap: 12px;
-        height: 100%;
-        min-width: auto;
-    }
-
-    .chapter-right span {
-        text-align: right;
-        font-size: 11px;
-        color: #888;
-        white-space: nowrap;
-        line-height: 1;
-        margin: 0;
-    }
-    
-    .badge-new {
-        margin: 0 !important;
-        align-self: center !important;
-        position: static !important;
-        transform: none !important;
-    }
+    .chapter-left { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
+    .chapter-right { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-end; gap: 10px; height: 100%; min-width: 120px; flex-shrink: 0; }
+    .chapter-right span { text-align: right; font-size: 11px; color: #888; white-space: nowrap; line-height: 1; margin: 0; flex-shrink: 0; }
+    .badge-new { margin: 0 !important; align-self: center !important; position: static !important; transform: none !important; flex-shrink: 0; }
 }
