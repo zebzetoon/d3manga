@@ -236,68 +236,92 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP MODU (YAN YANA VE DÜZGÜN) */
+/* 💻 PC / DESKTOP MODU (SLIDER VE KART DÜZELTME) */
 /* ========================================== */
 @media (min-width: 1024px) {
     /* 1. GENEL YERLEŞİM */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
     
-    /* 2. KART YAPISI (GRID) */
+    /* 2. SLIDER AYARLARI (GÜÇLENDİRİLDİ) */
+    .hero-slider-container { 
+        height: 450px; /* Yüksekliği artırdık */
+        border-radius: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .slide-content {
+        padding: 0 60px; /* İçerik kenara yapışmasın */
+        gap: 40px; /* Yazı ve Poster arasını aç */
+    }
+
+    .slide-title { 
+        font-size: 42px; /* Başlık devasa olsun */
+        line-height: 1.1; 
+        margin-bottom: 15px; 
+    }
+    
+    .slide-desc { 
+        font-size: 16px; 
+        max-width: 600px; 
+        -webkit-line-clamp: 4; /* Daha fazla satır göster */
+        margin-bottom: 25px; 
+    }
+    
+    .slide-poster { 
+        width: 220px; /* Poster PC'de büyük olsun */
+        height: 330px; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8); /* Derinlik ver */
+    }
+
+    /* 3. KART YAPISI (GRID) */
     .manga-list-container { 
         display: grid; 
         grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
         gap: 25px; 
     }
-    /* Kart yüksekliğini serbest bıraktık, içeriğe göre esnesin */
     .manga-list-item { height: auto; min-height: 190px; }
     
-    /* 3. GİZLENECEK VE AYARLANACAKLAR */
+    /* 4. GİZLENECEK VE AYARLANACAKLAR */
     .bottom-nav { display: none !important; }
     .top-header { padding: 0 50px; height: 75px; }
-    .hero-slider-container { height: 420px; }
     .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
     .detail-cover { width: 240px; margin-bottom: 0; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
 
-    /* 🔥 DÜZELTME BURADA: YAN YANA VE TAM ORTALI 🔥 */
-    
-    /* Bölüm kutusu */
+    /* 5. KART İÇİ DÜZEN (Oku/Yeni HİZASI - DOKUNULMADI) */
     .mini-chapter-item {
-        height: 40px; /* Rahat sığması için yükseklik */
+        height: 40px;
         display: flex;
-        align-items: center; /* İçindekileri dikey ortala */
+        align-items: center;
         justify-content: space-between; 
         padding: 0 12px; 
         width: 100%;
         box-sizing: border-box;
     }
 
-    /* Sağ taraf (Rozet ve Tarih Yan Yana) */
     .chapter-right {
         display: flex !important;
-        flex-direction: row !important; /* YAN YANA OLSUN */
-        align-items: center !important; /* Dikeyde TAM ORTALA */
-        justify-content: flex-end;      /* Sağa yasla */
-        gap: 12px; /* Birbirine yapışmasın */
+        flex-direction: row !important; /* YAN YANA */
+        align-items: center !important; /* DİKEYDE ORTALI */
+        justify-content: flex-end;
+        gap: 12px;
         height: 100%;
         min-width: auto;
     }
 
-    /* Tarih Yazısı */
     .chapter-right span {
         text-align: right;
         font-size: 11px;
         color: #888;
         white-space: nowrap;
-        line-height: 1; /* Satır kaymasını önler */
+        line-height: 1;
         margin: 0;
     }
     
-    /* Rozet Ayarı */
     .badge-new {
         margin: 0 !important;
-        align-self: center !important; /* Kendini ortala */
+        align-self: center !important;
         position: static !important;
         transform: none !important;
     }
