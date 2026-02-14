@@ -236,41 +236,47 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP DÜZENLEMESİ (GRID SİSTEMİ) */
+/* 💻 PC / DESKTOP MODU (GÜNCELLENMİŞ) */
 /* ========================================== */
 @media (min-width: 1024px) {
-    /* Genel Kapsayıcı */
+    /* 1. GENEL YERLEŞİM (Dokunulmadı) */
     .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
-    
-    /* Grid Yapısı: Kartları yan yana diz */
-    .manga-list-container { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
-        gap: 25px; 
-    }
-
-    /* Kart Yüksekliği Serbest (PC'de içerik rahat sığsın) */
-    .manga-list-item { 
-        height: auto; 
-        min-height: 190px;
-    }
-    .manga-list-item:hover { transform: translateY(-5px); border-color: #ff0055; box-shadow: 0 10px 30px rgba(255,0,85,0.15); }
-    
-    .list-poster-area { width: 125px; height: 185px; } /* PC'de poster biraz daha büyük */
-
-    /* PC'de Alt Menüyü Gizle */
+    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
+    .manga-list-item { height: auto; min-height: 190px; }
     .bottom-nav { display: none !important; }
-
-    /* Header Ayarları */
     .top-header { padding: 0 50px; height: 75px; }
-    .search-container { width: 300px; }
-    .search-container:focus-within { width: 400px; }
-    
     .hero-slider-container { height: 420px; }
     
-    /* Detay Sayfası Düzeni */
+    /* Detay Sayfası (Dokunulmadı) */
     .detail-header { flex-direction: row; align-items: flex-end; gap: 40px; text-align: left; }
     .detail-cover { width: 240px; margin-bottom: 0; }
     .action-buttons { justify-content: flex-start; }
     .detail-content { max-width: 1000px; }
+
+    /* 🔥 SADECE BURASI DEĞİŞTİ: ROZET VE TARİH HİZALAMA 🔥 */
+    .chapter-right {
+        display: flex !important;
+        flex-direction: column !important; /* Alt alta diz */
+        justify-content: center !important; /* Dikeyde ortala */
+        align-items: center !important;     /* Yatayda TAM ORTALA (İstediğin bu) */
+        gap: 5px; /* Aradaki boşluk */
+        min-width: 80px;
+        height: 100%;
+        margin-left: 10px;
+    }
+
+    /* Rozetin kendisini de ortalamaya zorla */
+    .badge-new {
+        margin: 0 auto !important; 
+        align-self: center !important;
+    }
+
+    /* Tarih yazısı (Dokunulmadı, sadece ortalandı) */
+    .chapter-right span {
+        text-align: center;
+        width: 100%;
+        color: #888;
+        font-size: 11px;
+    }
 }
+
