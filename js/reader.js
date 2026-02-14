@@ -1,22 +1,34 @@
 function openReader(isim, no, push = true) {
     if (push) window.history.pushState({}, '', `?seri=${encodeURIComponent(isim)}&bolum=${no}`);
     currentSeri = isim;
+
+    // --- ÖNEMLİ KISIM: Diğer sayfaları GİZLE ---
+    document.getElementById('home-view').style.display = 'none';
     document.getElementById('detail-view').style.display = 'none';
+    // Sadece okuyucuyu GÖSTER
     document.getElementById('reader-view').style.display = 'block';
     
     const sel = document.getElementById('cSelect'); 
     sel.innerHTML = "";
-    ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
+    if (ARSIV[isim] && ARSIV[isim].bolumler) {
+        ARSIV[isim].bolumler.forEach(b => sel.add(new Option("Bölüm " + b, b)));
+    }
     sel.value = no;
     
     resimGetir();
 }
 
-function closeReader() { openDetail(currentSeri, true); }
+function closeReader() { 
+    openDetail(currentSeri, true); 
+}
 
 function resimGetir() {
     const box = document.getElementById('box'), loader = document.getElementById('reader-loader'), b = document.getElementById('cSelect').value, v = ARSIV[currentSeri];
-    box.innerHTML = ""; loader.style.display = "flex"; document.getElementById('reader-view').scrollTop = 0;
+    
+    box.innerHTML = ""; 
+    loader.style.display = "flex"; 
+    window.scrollTo(0,0);
+    document.getElementById('reader-view').scrollTop = 0;
     
     window.history.replaceState({}, '', `?seri=${encodeURIComponent(currentSeri)}&bolum=${b}`);
     
@@ -25,6 +37,7 @@ function resimGetir() {
         let img = document.createElement("img");
         let path = `https://cdn.jsdelivr.net/gh/${v.u}/${v.r}/${v.k==='.'?'':v.k+'/'}${b}/${i}.jpg`;
         img.src = IS_MOBILE ? `https://wsrv.nl/?url=${encodeURIComponent(path)}&w=800&output=jpg` : path;
+        
         img.onload = () => { loaded++; if(loaded>1) loader.style.display = "none"; };
         img.onerror = function() { this.remove(); if(box.children.length===0) loader.style.display = "none"; };
         box.appendChild(img);
