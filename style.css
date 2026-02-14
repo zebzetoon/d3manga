@@ -1,4 +1,4 @@
-/* --- GENEL AYARLAR --- */
+/* --- TEMEL AYARLAR --- */
 * { box-sizing: border-box; }
 body { 
     background-color: #000; 
@@ -10,88 +10,52 @@ body {
 }
 a { text-decoration: none; color: white; }
 button { cursor: pointer; border: none; outline: none; }
-.loading-text { text-align: center; color: #555; padding: 50px; }
 
-/* --- YENİ HEADER (EVA SCANS TARZI) --- */
+/* --- HEADER (ÜST MENÜ) --- */
 .top-header {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 60px;
-    background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px);
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+    background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 15px; z-index: 2000;
-    border-bottom: 1px solid #222;
+    padding: 0 15px; z-index: 1000; border-bottom: 1px solid #222;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
-
-.header-logo img { height: 35px; width: auto; object-fit: contain; }
-
-.header-actions { display: flex; gap: 10px; }
-
-/* Yuvarlak Butonlar */
-.circle-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: #fff;
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: 0.3s;
+.header-logo img { height: 35px; width: auto; display: block; object-fit: contain; }
+.search-container {
+    display: flex; align-items: center; background: #1a1a1a;
+    border-radius: 30px; padding: 0 5px 0 15px; border: 1px solid #333;
+    width: 150px; transition: 0.3s;
 }
-.circle-btn:hover { background: #333; color: #ff0055; border-color: #ff0055; }
-
-/* --- ARAMA EKRANI (OVERLAY) --- */
-.search-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95); z-index: 3000;
-    display: flex; flex-direction: column; align-items: center; padding-top: 100px;
-}
-.search-box-wrapper {
-    display: flex; width: 90%; max-width: 600px;
-    background: #111; border-radius: 30px; border: 1px solid #333;
-    padding: 5px 15px;
-}
-.search-box-wrapper input {
-    flex: 1; background: transparent; border: none; color: white;
-    padding: 10px; font-size: 16px; outline: none;
-}
-.search-box-wrapper button {
-    background: transparent; color: #ff0055; font-size: 18px;
-}
-.close-search {
-    margin-top: 20px; background: #222; color: white;
-    width: 50px; height: 50px; border-radius: 50%; font-size: 20px;
-}
+.search-container:focus-within { border-color: #ff0055; width: 180px; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
+#searchInput { border: none; background: transparent; color: #ddd; font-size: 13px; padding: 8px 0; width: 100%; outline: none; }
+#searchBtn { background: transparent; color: #777; border: none; padding: 8px 10px; cursor: pointer; font-size: 14px; }
 
 /* --- ANA YAPI --- */
-.app-container { 
-    padding: 15px; padding-top: 75px; 
-    min-height: 100vh; padding-bottom: 80px; 
-    width: 100%;
-}
+.app-container { padding: 15px; padding-top: 75px; min-height: 100vh; padding-bottom: 80px; }
 .section-title { font-size: 18px; font-weight: bold; margin: 25px 0 15px 0; color: #ddd; border-left: 4px solid #ff0055; padding-left: 10px; }
 
 /* --- SLIDER --- */
-.hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 30px; }
-.hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; }
+.hero-slider-container { position: relative; width: 100%; height: 280px; border-radius: 15px; overflow: hidden; background: #000; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: 0.8s ease; display: flex; align-items: center; padding: 20px; box-sizing: border-box; }
 .hero-slide.active { opacity: 1; z-index: 2; }
 .slide-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(15px) brightness(0.4); z-index: -1; transform: scale(1.1); }
 .slide-content { position: relative; z-index: 10; width: 100%; }
 .slide-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-.slide-btn { background: #ff0055; color: white; padding: 12px 25px; border-radius: 30px; font-weight: 700; }
+.slide-desc { font-size: 12px; color: #ddd; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.slide-btn { background: #ff0055; color: white; padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 13px; }
 .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 20; }
 .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; cursor: pointer; }
 .dot.active { background: #ff0055; transform: scale(1.4); }
 
-/* --- LİSTE VE KARTLAR --- */
-.manga-list-container { display: flex; flex-direction: column; gap: 15px; width: 100%; }
-.manga-list-item { display: flex; gap: 12px; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; overflow: hidden; width: 100%; }
+/* --- MANGA LİSTESİ --- */
+.manga-list-container { display: flex; flex-direction: column; gap: 15px; }
+.manga-list-item { display: flex; gap: 12px; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; overflow: hidden; }
 .list-poster-area { width: 95px; height: 140px; flex-shrink: 0; }
 .list-poster { width: 100%; height: 100%; border-radius: 6px; object-fit: cover; }
-.list-content-area { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 0; }
+.list-content-area { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
 .list-title { font-size: 16px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .list-rating { font-size: 11px; color: #ffcc00; margin-bottom: 6px; }
 
-/* Bölüm Listesi */
+/* Mini Bölüm Listesi */
 .mini-chapter-list { display: flex; flex-direction: column; gap: 5px; width: 100%; }
 .mini-chapter-item { background: #1a1a1a; padding: 0 10px; border-radius: 6px; font-size: 11px; color: #ccc; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; height: 34px; cursor: pointer; }
 .badge-new { background: #ff0055; color: #fff !important; font-weight: 900; font-size: 9px; border-radius: 4px; width: 36px; height: 18px; display: flex; justify-content: center; align-items: center; }
@@ -110,9 +74,17 @@ button { cursor: pointer; border: none; outline: none; }
 .chapter-item { padding: 15px; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; cursor: pointer; }
 .back-btn-float { position: fixed; top: 80px; left: 20px; width: 40px; height: 40px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(5px); }
 
-/* --- OKUYUCU --- */
-#reader-view { position: fixed !important; top: 0; left: 0; width: 100%; height: 100%; background: #000 !important; z-index: 99999 !important; overflow-y: scroll; -webkit-overflow-scrolling: touch; display: none; }
-.reader-header { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 15px; z-index: 100000; }
+/* --- OKUYUCU (TAM EKRAN SABİT) --- */
+#reader-view { 
+    position: fixed !important; top: 0; left: 0; width: 100%; height: 100%; 
+    background: #000 !important; z-index: 99999 !important; 
+    overflow-y: scroll; -webkit-overflow-scrolling: touch; display: none; 
+}
+.reader-header { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px; 
+    background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); 
+    border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: center; gap: 15px; z-index: 100000; 
+}
 .reader-content { padding-top: 70px; padding-bottom: 50px; width: 100%; min-height: 100vh; }
 .reader-content img { width: 100%; max-width: 800px; height: auto; margin: 0 auto; display: block; border-bottom: 1px solid #111; }
 .nav-btn { background: #222; color: white; width: 45px; height: 40px; border-radius: 8px; font-size: 18px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; }
@@ -120,14 +92,12 @@ button { cursor: pointer; border: none; outline: none; }
 
 /* --- FOOTER & YORUMLAR --- */
 .comments-section { margin-top: 50px; border-radius: 25px; overflow: hidden; background: #292929; border: none; padding: 0 15px 20px 15px; min-height: 200px; }
-.site-footer { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px 100px 20px; text-align: center; position: relative; z-index: 10; }
-.footer-logo { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1a1a1a; }
-.footer-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
-.footer-desc { font-size: 14px; color: #ccc; margin-bottom: 25px; max-width: 500px; line-height: 1.5; }
-.footer-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-.footer-btn { width: 50px; height: 50px; background-color: #222; border-radius: 12px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; border: 1px solid #333; }
-.dmca-btn { font-size: 11px; font-weight: 900; width: auto; padding: 0 15px; }
-.footer-copyright { color: #555; font-size: 12px; }
+.site-footer { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px 120px 20px; text-align: center; }
+.footer-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1a1a1a; }
+.footer-title { font-size: 26px; font-weight: 800; margin-bottom: 15px; }
+.footer-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.footer-btn { width: 55px; height: 55px; background-color: #222; border-radius: 14px; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 22px; border: 1px solid #333; }
+.dmca-btn { font-size: 12px; font-weight: 900; width: auto; padding: 0 18px; }
 
 /* --- MOBİL ALT MENÜ --- */
 .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; z-index: 1000; height: 60px; }
@@ -136,45 +106,18 @@ button { cursor: pointer; border: none; outline: none; }
 .nav-item.active { color: #ff0055; }
 
 /* ========================================== */
-/* 💻 PC / DESKTOP DÜZENLEMESİ (GRID SİSTEMİ) */
+/* 💻 PC (DESKTOP) MODU İÇİN AYARLAR */
 /* ========================================== */
 @media (min-width: 1024px) {
-    /* Genel Kapsayıcı: Sınırlı genişlik ve ortalama */
-    .app-container { 
-        max-width: 1200px !important; 
-        margin: 0 auto; 
-        padding-top: 100px;
-    }
-
-    /* Grid Yapısı: Kartları yan yana diz */
-    .manga-list-container { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-        gap: 25px; 
-    }
-
-    /* Kart Boyutları */
-    .manga-list-item { 
-        height: 180px; 
-        width: 100%;
-        margin-bottom: 0; /* Mobildeki boşluğu sıfırla */
-    }
-    .manga-list-item:hover { 
-        transform: translateY(-5px); 
-        border-color: #ff0055; 
-        box-shadow: 0 5px 20px rgba(255,0,85,0.2); 
-    }
-
-    /* PC'de Alt Menüyü Gizle */
-    .bottom-nav { display: none !important; }
-
-    /* Header Ayarları */
+    .app-container { max-width: 1200px !important; margin: 0 auto; padding-top: 100px; }
+    .manga-list-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+    .manga-list-item { height: 180px; }
+    .manga-list-item:hover { transform: translateY(-5px); border-color: #ff0055; box-shadow: 0 5px 15px rgba(255,0,85,0.2); }
+    .bottom-nav { display: none !important; } /* Mobildeki alt menüyü PC'de gizle */
     .top-header { padding: 0 50px; height: 70px; }
-    
-    /* Footer'ı Küçült */
-    .site-footer { padding: 50px 0; }
-    
-    /* Detay Sayfası Düzeni */
+    .search-container { width: 300px; }
+    .search-container:focus-within { width: 400px; }
+    .hero-slider-container { height: 400px; }
     .detail-header { flex-direction: row; align-items: flex-end; gap: 30px; text-align: left; }
     .detail-cover { width: 220px; margin-bottom: 0; }
     .action-buttons { justify-content: flex-start; }
