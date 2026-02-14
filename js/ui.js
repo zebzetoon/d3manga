@@ -43,9 +43,10 @@ function openDetail(isim, push = true) {
 
     renderChapterList(isim);
 
+    // Diğer sayfaları GİZLE
     document.getElementById('home-view').style.display = 'none';
-    document.getElementById('detail-view').style.display = 'block';
     document.getElementById('reader-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block';
     
     loadGraphComment("seri_" + isim, isim, "cusdis_series");
     if(push) window.scrollTo(0,0);
@@ -53,9 +54,12 @@ function openDetail(isim, push = true) {
 
 function closeDetail(push = true) {
     if (push) window.history.pushState({}, '', window.location.pathname);
+    
     document.getElementById('detail-view').style.display = 'none';
     document.getElementById('reader-view').style.display = 'none';
     document.getElementById('home-view').style.display = 'block';
+    
+    window.scrollTo(0,0);
 }
 
 function renderChapterList(isim) {
